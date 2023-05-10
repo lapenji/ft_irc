@@ -1,6 +1,6 @@
 #include "server_side.hpp"
 
-Server::Server(const std::string& password): opt(1), password(password) {
+Server::Server(const std::string& port, const std::string& password): opt(1), port(port), password(password) {
     this->socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     setSocket();
 }
@@ -18,7 +18,7 @@ void Server::setSocket() {
         exit(-1);
     }
 
-    struct sockaddr_in address;
+    sockaddr_in address = {};
     bzero((char *) &address, sizeof(address));
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
@@ -56,6 +56,7 @@ void Server::startServer() {
                         std::cerr << "->>\tNew connection refused" << std::endl;
                     }
                     else {
+                        std::cout << "->>\tNew connection accepted" << std::endl;
                         pollfd new_pollfd = {socket_fd, POLLIN, 0};
                         this->poll_vec.push_back(new_pollfd);
                     }

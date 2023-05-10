@@ -12,12 +12,13 @@ class Server {
 private:
     int socket_fd;
     int opt;
+    std::string port;
     std::string password;
     void setSocket();
     std::vector<pollfd> poll_vec;
 
 public:
-    Server(const std::string& password);
+    Server(const std::string& port, const std::string& password);
     ~Server();
     void startServer();
 };
