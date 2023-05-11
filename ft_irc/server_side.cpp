@@ -37,6 +37,31 @@ void Server::setSocket() {
     std::cout << "->>\tListening on port 8000..." << std:: endl;
 }
 
+int handle_client_request(int client_fd) {
+    char buffer[1024];
+    bzero(buffer, 1024);
+    int num_bytes = recv(client_fd, buffer, sizeof(buffer), 0);
+    if (num_bytes == -1) {
+        std::cerr << "->>\tError handling client!" << std::endl;
+        return -1;
+    }
+    else if (num_bytes == 0) {
+        // Il client ha chiuso la connessione
+        return -1;
+    }
+    else {
+        std::cout << "->>\tMessaggio del client " << client_fd << ": " << buffer << std::flush;
+        const char* response = "Message received from server\n";
+        int num_sent = send(client_fd, response, strlen(response), 0);
+        if (num_sent == -1) {
+            std::cerr << "->>\tError sending response to client!" << std::endl;
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
 void Server::startServer() {
     pollfd new_pollfd = {socket_fd, POLLIN, 0};
     this->poll_vec.push_back(new_pollfd);
@@ -45,23 +70,38 @@ void Server::startServer() {
             std::cerr << "Poll error, exit..." << std::endl;
             exit (-1);
         }
-        std::vector<pollfd>::iterator it = this->poll_vec.begin();
-        while (it != this->poll_vec.end()) {
-            if (it->revents & POLLIN) {
-                if (it->fd == this->socket_fd) {
-                    sockaddr_in client_address = {};
-                    socklen_t client_address_len = sizeof(client_address);
-                    int client_fd = accept(this->socket_fd, (sockaddr*) &client_address, &client_address_len);
-                    if (client_fd < 0) {
-                        std::cerr << "->>\tNew connection refused" << std::endl;
-                    }
-                    else {
-                        std::cout << "->>\tNew connection accepted" << std::endl;
-                        pollfd new_pollfd = {socket_fd, POLLIN, 0};
-                        this->poll_vec.push_back(new_pollfd);
-                    }
-                }
+        if (this->poll_vec[0].revents & POLLIN) {
+            sockaddr_in client_address = {};
+            socklen_t client_address_len = sizeof(client_address);
+            int client_fd = accept(this->socket_fd, (sockaddr*) &client_address, &client_address_len);
+            if (client_fd < 0) {
+                std::cerr << "->>\tNew connection refused" << std::endl;
+            }
+            else {
+                std::cout << "->>\tNew connection accepted" << std::endl;
+                pollfd new_pollfd = {client_fd, POLLIN, 0};
+                this->poll_vec.push_back(new_pollfd);
+                std::cout << "->>\t valore:" << new_pollfd.fd << std::endl;
             }
         }
+        std::vector<pollfd>::iterator it = this->poll_vec.begin();
+        it++;
+        while (it != this->poll_vec.end()) {
+            if (it->revents & POLLIN) {
+                // Un client ha inviato dei dati
+                if (handle_client_request(it->fd) == -1) {
+                    // Il client si è disconnesso, rimuovi il socket dalla lista
+                    close(it->fd);
+                    std::cout << "->>\tDisconnected" << std::endl;
+                    this->poll_vec.erase(it);
+                    it--;
+                }
+            }
+            it++;
+        }
     }
+
 }
+
+
+

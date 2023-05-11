@@ -8,6 +8,11 @@
 #include <vector>
 #include <sys/poll.h>
 
+#include <string.h>
+#include <unistd.h>
+#include <stdio.h>
+
+
 class Server {
 private:
     int socket_fd;
