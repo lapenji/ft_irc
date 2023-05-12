@@ -1,5 +1,33 @@
 #include "server_side.hpp"
 
+//PER GESTIRE QUIT?
+
+// void    Server::ft_manage_quit(const std::string& tmp, int fd) {
+//     (void)tmp;
+//     delete this->connected_clients.at(fd);
+//     this->connected_clients.erase(fd);
+//     std::vector<pollfd>::iterator it = this->poll_vec.begin();
+//     while (it->fd != fd) {
+//         it ++;
+//     }
+//     close(it->fd);
+//     this->poll_vec.erase(it);
+// }
+
+bool    Server::sendAll(const char *resp) {
+    std::map<int, Client*>::iterator    it = this->connected_clients.begin();
+    while (it != this->connected_clients.end())
+    {
+        int num_sent = send(it->first, resp, strlen(resp), 0);
+        if (num_sent == -1) {
+            std::cerr << "->>\tError sending response to client!" << std::endl;
+            return false;
+        }
+        it++;
+    }
+    return true;
+}
+
 Server::Server(const std::string& port, const std::string& password): opt(1), port(port), password(password) {
     this->socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     setSocket();
@@ -60,11 +88,14 @@ void    Server::ft_manage_user(const std::string& tmp, int client_fd, std::strin
         result.push_back(word);
     }
     if (result.size() >= 5) {
+        if (this->connected_clients.at(client_fd)->getFull() != "") {
+            resp = "you already register\n";
+            return;
+        }
         ft_create_map_user(result, client_fd);
         resp = "welcome to server!\n";
         return;
     }
-    
     resp = "not enough parameters\n";
 }
 
@@ -119,8 +150,11 @@ int Server::handle_client_request(int client_fd) {
             ft_manage_nick(buffer, client_fd, resp);
         if (tmp.substr(0, 4) == "USER" || tmp.substr(0, 4) == "user")
             ft_manage_user(buffer, client_fd, resp);
+        if (tmp.substr(0, 4) == "QUIT" || tmp.substr(0, 4) == "quit") {
+            return -1;
+        }
         
-        printMap(this->connected_clients);
+        //printMap(this->connected_clients);
         std::cout << "->>\tMessaggio del client " << client_fd << ": " << buffer << std::flush;
         const char* response = resp.c_str();
         int num_sent = send(client_fd, response, strlen(response), 0);
@@ -129,7 +163,6 @@ int Server::handle_client_request(int client_fd) {
             return -1;
         }
     }
-
     return 0;
 }
 
@@ -182,7 +215,6 @@ void Server::startServer() {
             it++;
         }
     }
-
 }
 
 

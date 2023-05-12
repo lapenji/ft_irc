@@ -28,6 +28,8 @@ private:
     void   ft_manage_nick(const std::string& tmp, int client_fd, std::string& resp);
     void    ft_manage_user(const std::string& tmp, int client_fd, std::string& resp);
     void    ft_create_map_user(std::vector<std::string> result, int client_fd);
+    bool    sendAll(const char* resp);
+    void    ft_manage_quit(const std::string& tmp, int fd);
 public:
     Server(const std::string& port, const std::string& password);
     ~Server();
