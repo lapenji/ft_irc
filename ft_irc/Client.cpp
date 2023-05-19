@@ -1,6 +1,12 @@
 #include "Client.hpp"
 
-Client::Client(int fd, const std::string& hostname, int port) : fd(fd), hostname(hostname), port(port) {}
+Client::Client(int fd, const std::string& hostname, int port) : fd(fd), password(""), hostname(hostname), port(port) {}
+
+Client::~Client() {}
+
+void    Client::setPassword(const std::string& password) {
+    this->password = password;
+}
 
 void                Client::setNickname(const std::string& nick) {
     this->nickname = nick;
@@ -16,6 +22,14 @@ const std::string&  Client::getNick() {
 
 const std::string&  Client::getFull() {
     return this->fullName;
+}
+
+const std::string&  Client::getUser() {
+    return this->username;
+}
+
+const std::string&  Client::getPass() {
+    return this->password;
 }
 
 void    Client::setUserName(const std::string& user) {

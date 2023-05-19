@@ -1,5 +1,12 @@
 #include "server_side.hpp"
 
+Server::Server(int port, const std::string& password): opt(1), port(port), password(password) {
+    this->socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    setSocket();
+}
+
+Server::~Server() {}
+
 //PER GESTIRE QUIT?
 
 // void    Server::ft_manage_quit(const std::string& tmp, int fd) {
@@ -28,33 +35,43 @@ bool    Server::sendAll(const char *resp) {
     return true;
 }
 
-Server::Server(const std::string& port, const std::string& password): opt(1), port(port), password(password) {
-    this->socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-    setSocket();
-}
-
-Server::~Server() {}
-
-void    printMap(std::map<int, Client*> myMap) { //FUNZIONE PER STAMPARE IL CONTENUTO DEL MAP (PER CONTROLLARLO)
-    std::cout << "STAMPO IL MAP" << std::endl;
-    for(std::map<int, Client*>::const_iterator it = myMap.begin();
-    it != myMap.end(); ++it)
-    {
-        std::cout << it->first << ": " << it->second->getNick() << " - " << it->second->getFull() << std::endl;
-    }
-}
-
-
-
-void    Server::ft_manage_nick(const std::string& tmp, int client_fd, std::string& resp) {
+void    Server::ft_manage_pass(const std::string& tmp, int client_fd, std::string& resp) {
+   /*  if (this->connected_clients.at(client_fd)->getPass().size() > 0) {
+        resp = "\nYou already inserted password, skip...\n";
+        return ;
+    } */
     std::string buffer;
     buffer = tmp.substr(0, tmp.length() -1);
     if (buffer.length() > 5) {
-        this->connected_clients.at(client_fd)->setNickname(buffer.substr(buffer.find(" ") + 1));
-        resp = "welcome to the server\n";
+        if (buffer.substr(buffer.find(" ") + 1) == this->password) {
+        this->connected_clients.at(client_fd)->setPassword(buffer.substr(buffer.find(" ") + 1));
+        resp = "\nPassword accepted\r\n";
         return;
+        }    
     }
-    resp = "not enough parameters, kicked!\n";
+    resp = "\nWrong password\r\n";
+}
+
+void    Server::ft_manage_nick(const std::string& tmp, int client_fd, std::string& resp) {
+    if (this->connected_clients.at(client_fd)->getNick() == "") {
+        std::string buffer;
+        buffer = tmp.substr(0, tmp.length() -1);
+        if (buffer.length() > 5) {
+            this->connected_clients.at(client_fd)->setNickname(buffer.substr(buffer.find(" ") + 1));
+            
+            std::cout << "\nNick accepted" << std::endl;
+            //resp = "\nNick accepted\r\n";
+        }
+        else {
+            std::cout << "\nYou already inserted nick, skip..." << std::endl;
+        }
+        //resp = "\nYou already inserted nick, skip...\n";
+    }
+    else {
+        std::cout << "\nnot enough parameters, kicked!" << std::endl;
+        //resp = "not enough parameters, kicked!\r\n";
+        resp = "";
+    }
 }
 
 void    Server::ft_create_map_user(std::vector<std::string> result, int client_fd) {
@@ -79,6 +96,10 @@ void    Server::ft_create_map_user(std::vector<std::string> result, int client_f
 }
 
 void    Server::ft_manage_user(const std::string& tmp, int client_fd, std::string& resp) {
+    /* if (this->connected_clients.at(client_fd)->getFull().size() > 0) {
+        resp = "\nYou already inserted user prarams, skip...\n";
+        return ;
+    } */
     std::string buffer;
     buffer = tmp.substr(0, tmp.length() -1);
     std::vector<std::string> result;
@@ -93,10 +114,10 @@ void    Server::ft_manage_user(const std::string& tmp, int client_fd, std::strin
             return;
         }
         ft_create_map_user(result, client_fd);
-        resp = "welcome to server!\n";
+        resp = "welcome to SovietServer!\r\n";
         return;
     }
-    resp = "not enough parameters\n";
+    resp = "not enough parameters\r\n";
 }
 
 void Server::setSocket() {
@@ -114,7 +135,7 @@ void Server::setSocket() {
     bzero((char *) &address, sizeof(address));
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(8000);
+    address.sin_port = htons(this->port);
 
     if(bind(socket_fd, (sockaddr*) &address, sizeof(address)) < 0) {
         std::cerr << "Binding error, exit..." << std::endl;
@@ -126,7 +147,7 @@ void Server::setSocket() {
         exit(-1);
     }
 
-    std::cout << "->>\tListening on port 8000..." << std:: endl;
+    std::cout << "->>\tListening on port " << this->port << std:: endl;
 }
 
 int Server::handle_client_request(int client_fd) {
@@ -142,29 +163,101 @@ int Server::handle_client_request(int client_fd) {
         return -1;
     }
     else {
+        //buffer[num_bytes] = '\0';   //// VERIFICARE, LO DICE CHATGPT
         std::string tmp = buffer;
         std::string resp;
-        resp = "Message received from server\n";
-        std::cout << tmp << std::endl;
+        //resp = "Message received from server\n";
+        ///parte di test
+        std::vector<std::string> buffer_splitted = ft_splitBuffer(tmp);
+
+        for (size_t i = 0; i < buffer_splitted.size(); ++i) {
+            if (buffer_splitted[i].find("NICK") == 0) {
+               ft_manage_nick(buffer_splitted[i], client_fd, resp);
+            }
+        }
+        //buffer_splitted.push_back(tmp);
+
+        /* std::istringstream iss(tmp); //FUNZIONA MA PROBABILMENTE NON E' LA SEPARAZIONE GIUSTA DA FARE
+        std::string line;
+        while (std::getline(iss, line)) {
+            if (line.find("PASS") == 0) {
+                this->connected_clients.at(client_fd)->setPassword(line.substr(5));
+            } else if (line.find("NICK") == 0) {
+                this->connected_clients.at(client_fd)->setNickname(line.substr(5));
+            } else if (line.find("USER") == 0) {
+                this->connected_clients.at(client_fd)->setFullName(line.substr(5));
+            }
+        } */
+        /* std::cout << "NICK = " << this->connected_clients.at(client_fd)->getNick() << std::endl;
+        std::cout << "USER = " << this->connected_clients.at(client_fd)->getFull() << std::endl;
+        std::cout << "PASS = " << this->connected_clients.at(client_fd)->getPass() << std::endl; */
+        std::string extract_name_from_user;
+        size_t colonPosition = this->connected_clients.at(client_fd)->getFull().find(":");
+    
+        if (colonPosition != std::string::npos) {
+            extract_name_from_user = this->connected_clients.at(client_fd)->getFull().substr(colonPosition + 1);
+        }
+        
+        if (this->connected_clients.at(client_fd)->getNick().size() > 0) {
+        resp = ":server 001 " + this->connected_clients.at(client_fd)->getNick() + " Welcome to the Soviet Network, " + this->connected_clients.at(client_fd)->getNick() + "!\r\n";
+        resp += ":server 311 " + this->connected_clients.at(client_fd)->getNick() + " " + this->connected_clients.at(client_fd)->getNick() + " Soviet server * " + extract_name_from_user + "\r\n";
+        resp += ":server 312 " + this->connected_clients.at(client_fd)->getNick() + " " + this->connected_clients.at(client_fd)->getNick() + " Soviet server :Server Description\r\n";
+        resp += ":server 318 " + this->connected_clients.at(client_fd)->getNick() + " " + this->connected_clients.at(client_fd)->getNick() + " :End of WHOIS list\r\n";}
+
+        //std::cout << resp << std::endl;
+        //std::cout << tmp << std::endl;
+
+
+        //////DA RIABILITARE ASSOLUTAMENTE A PROBLEMA RISOLTO
+
+       /*  if ((tmp.substr(0, 4) == "PASS" || tmp.substr(0, 4) == "pass"))
+            ft_manage_pass(buffer, client_fd, resp);
         if ((tmp.substr(0, 4) == "NICK" || tmp.substr(0, 4) == "nick"))
             ft_manage_nick(buffer, client_fd, resp);
         if (tmp.substr(0, 4) == "USER" || tmp.substr(0, 4) == "user")
             ft_manage_user(buffer, client_fd, resp);
         if (tmp.substr(0, 4) == "QUIT" || tmp.substr(0, 4) == "quit") {
             return -1;
-        }
-        
-        //printMap(this->connected_clients);
-        std::cout << "->>\tMessaggio del client " << client_fd << ": " << buffer << std::flush;
-        const char* response = resp.c_str();
+        }*/
+
+        ////DECOMMENTARE QUANDO IL CLIENT IMMETTE PASSWORD NICK E USER CORRETTI
+        /* const char* response = "001 Welcome to Soviet Server!\n";
         int num_sent = send(client_fd, response, strlen(response), 0);
         if (num_sent == -1) {
             std::cerr << "->>\tError sending response to client!" << std::endl;
             return -1;
-        }
+        } */
+        
+        //printMap(this->connected_clients);
+        
+        
+        
+        std::cout << "->>\tMessaggio del client " << client_fd << ": " << buffer  << std::flush;
+        const char* response = resp.c_str();
+        this->serverReplyMessage(response, client_fd);
+        /* response = resp2.c_str();
+        this->serverReplyMessage(response, client_fd);
+        response = resp3.c_str();
+        this->serverReplyMessage(response, client_fd);
+        response = resp4.c_str();
+        this->serverReplyMessage(response, client_fd); */
+       /*  num_sent = send(client_fd, response, strlen(response), 0);
+        if (num_sent == -1) {
+            std::cerr << "->>\tError sending response to client!" << std::endl;
+            return -1;
+        } */
     }
     return 0;
 }
+
+void Server::serverReplyMessage(const char* response, int client_fd) {
+    int num_sent = send(client_fd, response, strlen(response), 0);
+        if (num_sent == -1) {
+            std::cerr << "->>\tError sending response to client!" << std::endl;
+            return ;
+        }
+}
+
 
 void Server::startServer() {
 
@@ -185,6 +278,8 @@ void Server::startServer() {
                 std::cerr << "->>\tNew connection refused" << std::endl;
             }
             else {
+                /* const char* response = "this is a private server that require a password.\nPlease type PASS <password>\n";
+                this->serverReplyMessage(response, client_fd); */
                 std::cout << "->>\tNew connection accepted" << std::endl;
                 pollfd new_pollfd = {client_fd, POLLIN, 0};
                 this->poll_vec.push_back(new_pollfd);
@@ -192,8 +287,8 @@ void Server::startServer() {
                 getnameinfo((struct sockaddr *) &s_address, sizeof(s_address), hostname, NI_MAXHOST, NULL, 0, NI_NUMERICSERV);
                 Client* tmp = new Client(new_pollfd.fd, hostname, ntohs(s_address.sin_port));
                 this->connected_clients.insert(std::make_pair(client_fd, tmp));
-                std::cout << "->>\t valore:" << new_pollfd.fd << std::endl;
-                printMap(connected_clients);
+                std::cout << "->>\tsocket:" << new_pollfd.fd << std::endl;
+                //printMap(connected_clients);
             }
         }
         std::vector<pollfd>::iterator it = this->poll_vec.begin();
