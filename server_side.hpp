@@ -34,7 +34,9 @@ private:
     void    ft_manage_pass(const std::string& tmp, int client_fd, std::string& resp);
     void    ft_create_map_user(std::vector<std::string> result, int client_fd);
     bool    sendAll(const char* resp);
-    void    ft_manage_quit(const std::string& tmp, int fd);
+    void    ft_manage_quit();
+    void    ft_print_welcome_msg(const std::string& extract_name_from_user, int client_fd);
+
 public:
     Server(int port, const std::string& password);
     ~Server();
