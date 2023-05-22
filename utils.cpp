@@ -1,5 +1,15 @@
 #include "utils.hpp"
 
+std::vector<std::string> ft_splitString(const std::string& str) {
+    std::vector<std::string> result;
+    std::stringstream ss(str);
+    std::string word;
+    while (ss >> word) {
+        result.push_back(word);
+    }
+    return result;
+}
+
 std::vector<std::string> ft_splitBuffer(std::string tmp) {
     size_t pos = tmp.find("\r\n");
     std::vector<std::string> buffer_splitted;
@@ -9,10 +19,10 @@ std::vector<std::string> ft_splitBuffer(std::string tmp) {
         pos = tmp.find("\r\n");
     }
     // Stampa le stringhe separate
-    std::cout << "STAMPO" << std::endl;
+   /*  std::cout << "STAMPO" << std::endl;
     for (size_t i = 0; i < buffer_splitted.size(); ++i) {
     std::cout << buffer_splitted[i] << std::endl;
-    }
+    } */
     return buffer_splitted;
 }
 
