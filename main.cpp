@@ -1,16 +1,5 @@
 #include "server_side.hpp"
 
-bool isStringNumeric(const std::string& str) {
-    for (std::size_t i = 0; i < str.length(); ++i) {
-        if (!std::isdigit(str[i])) {
-            return false;
-        }
-    }
-    return true;
-}
-
-
-
 int main (int argc, char **argv) {
     
     if (argc != 3) {

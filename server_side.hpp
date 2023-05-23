@@ -16,7 +16,6 @@
 #include <cctype>
 #include "utils.hpp"
 
-
 class Server {
 private:
     int socket_fd;
@@ -25,7 +24,6 @@ private:
     std::string password;
     std::vector<pollfd> poll_vec;
     std::map<int, Client *> connected_clients;
-    bool printed;
     
     void    serverReplyMessage(const char* response, int client_fd);
     int     handle_client_request(int client_fd);
@@ -37,7 +35,7 @@ private:
     void    ft_manage_ping(const std::string& tmp, int client_fd);
     void    ft_create_map_user(std::vector<std::string> result, int client_fd);
     bool    sendAll(const char* resp);
-    void    ft_manage_quit();
+    void    ft_delete_client(int client_fd);
     void    ft_print_welcome_msg(const std::string& extract_name_from_user, int client_fd);
 
 public:

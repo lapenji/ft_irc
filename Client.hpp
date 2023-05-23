@@ -12,6 +12,7 @@ class Client {
     std::string username;
     std::string serverName;
     int         port;
+    bool printed;
 
     public:
     Client(int fd, const std::string& hostname, int port);
@@ -22,10 +23,12 @@ class Client {
     void    setUserName(const std::string& user);
     void    setHostname(const std::string& host);
     void    setServerName(const std::string& servername);
+    void    setPrinted(bool printed);   //////TEST
     const std::string&  getNick();
     const std::string&  getFull();
     const std::string&  getUser();
     const std::string&  getPass();
+    bool    getPrinted();   ////TEST
 };
 
 #endif

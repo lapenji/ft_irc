@@ -1,5 +1,14 @@
 #include "utils.hpp"
 
+bool isStringNumeric(const std::string& str) {
+    for (std::size_t i = 0; i < str.length(); ++i) {
+        if (!std::isdigit(str[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 std::vector<std::string> ft_splitString(const std::string& str) {
     std::vector<std::string> result;
     std::stringstream ss(str);
