@@ -248,11 +248,11 @@ int Server::handle_client_request(int client_fd) {
             conn_client->setPrinted(true);
             ft_print_welcome_msg(extract_name_from_user, client_fd);
         }
-        // else
-        //    this->serverReplyMessage(":server "/* response */, client_fd);
-        if (conn_client->getPrinted() == false) {       ///////////SOLO PER TEST A CASA , DECOMMENTARE ELSE
+        else
+            this->serverReplyMessage(":server "/* response */, client_fd);
+        /* if (conn_client->getPrinted() == false) {       ///////////SOLO PER TEST A CASA , DECOMMENTARE ELSE
             conn_client->setPrinted(true);
-            ft_print_welcome_msg(extract_name_from_user, client_fd);}
+            ft_print_welcome_msg(extract_name_from_user, client_fd);}*/
     }
     return 0;
 }
