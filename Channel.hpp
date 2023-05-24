@@ -6,4 +6,8 @@ private:
     std::map<int, Client *> users;
     std::string             password;
     std::map<int, Client *> admins;
+
+public:
+    Channel();
+    ~Channel();
 };

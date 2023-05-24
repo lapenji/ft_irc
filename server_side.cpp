@@ -49,10 +49,10 @@ void Server::serverReplyMessage(const char* response, int client_fd) {
 void Server::ft_print_welcome_msg(const std::string& extract_name_from_user, int client_fd) {
     Client* conn_client = this->connected_clients.at(client_fd);
     std::string resp;
-    resp = ":server 001 " + conn_client->getNick() + " Welcome to the Soviet Network, " + conn_client->getNick() + "!\r\n"
-    + ":server 311 " + conn_client->getNick() + " " + conn_client->getNick() + " Soviet server * " + extract_name_from_user + "\r\n"
-    + ":server 312 " + conn_client->getNick() + " " + conn_client->getNick() + " Soviet server :Server Description\r\n"
-    + ":server 318 " + conn_client->getNick() + " " + conn_client->getNick() + " :End of WHOIS list\r\n";
+    resp = ":SovietServer 001 " + conn_client->getNick() + " Welcome to the Soviet Network, " + conn_client->getNick() + "!\r\n"
+    + ":SovietServer 311 " + conn_client->getNick() + " " + conn_client->getNick() + " Soviet server * " + extract_name_from_user + "\r\n"
+    + ":SovietServer 312 " + conn_client->getNick() + " " + conn_client->getNick() + " Soviet server :Server Description\r\n"
+    + ":SovietServer 318 " + conn_client->getNick() + " " + conn_client->getNick() + " :End of WHOIS list\r\n";
     this->serverReplyMessage(resp.c_str(), client_fd);
 }
 
@@ -83,13 +83,46 @@ void Server::ft_delete_client(int client_fd) {
     return true;
 } */
 
+
+
 void    Server::ft_manage_ping(const std::string& tmp, int client_fd) {
     std::string resp;
     std::vector<std::string> tmp_splitted = ft_splitBuffer(tmp);
     if (tmp_splitted.size() == 2) {
-        resp = ":server PONG Soviet server :Server Description\r\n";// + tmp_splitted[1];   /// QUI NON VA MESSO \R\N PERCHE' E' DENTRO LA STRINGA, CREDO
+        resp = ":SovietServer PONG SovietServer :Server Description\r\n";// + tmp_splitted[1];   /// QUI NON VA MESSO \R\N PERCHE' E' DENTRO LA STRINGA, CREDO
         this->serverReplyMessage(resp.c_str(), client_fd);
     }
+}
+
+void    Server::ft_manage_part(const std::string& tmp, int client_fd) {
+    /////////////GESTIRE IL MESSAGGIO TIPO /leave ciao
+    Client* conn_client = this->connected_clients.at(client_fd);
+    std::string resp;
+    std::vector<std::string> tmp_splitted = ft_splitString(tmp);
+    resp = ":SovietServer PART " + tmp_splitted[1] + " " +  conn_client->getNick() + "\r\n";
+    /* std::map<std::string, Channel *>::iterator it = this->channels.begin();
+    while (it != this->channels.end()) {
+        if (it->first == tmp_splitted[1]) {
+            delete it->second;
+            this->channels.erase(it);
+        }
+        it++;
+    } */
+
+    this->serverReplyMessage(resp.c_str(), client_fd);
+}
+
+void    Server::ft_manage_join(const std::string& tmp, int client_fd) {
+    Client* conn_client = this->connected_clients.at(client_fd);
+    std::string resp;
+    std::vector<std::string> tmp_splitted = ft_splitString(tmp);
+    resp = ":SovietServer 332 " + conn_client->getUser() + " " + tmp_splitted[1] + " :Dear " + conn_client->getNick() + ", you just entered in the channel "
+    + tmp_splitted[1] + " of our SovietServer, feel comfortable...\r\n"
+    + ":SovietServer 353 " + conn_client->getUser() + " = " + tmp_splitted[1] + " :@" + conn_client->getUser() + "\r\n" //QUI CI VUOLE LA LISTA DI TUTTI GLI UTENTI
+    + ":SovietServer 366 " + conn_client->getUser() + " = " + tmp_splitted[1] + " :End of /NAMES list.\r\n"; 
+    this->channels.insert(std::make_pair(tmp_splitted[1], new Channel()));
+    //std::cout << resp << std::endl;   //DEBUG
+    this->serverReplyMessage(resp.c_str(), client_fd);
 }
 
 void    Server::ft_manage_mode(const std::string& tmp, int client_fd) {
@@ -98,7 +131,7 @@ void    Server::ft_manage_mode(const std::string& tmp, int client_fd) {
     std::vector<std::string> tmp_splitted = ft_splitBuffer(tmp);
     if (tmp_splitted.size() == 3 && tmp_splitted[1] == conn_client->getUser()) {
         if (tmp_splitted[2][0] == '+' && tmp_splitted[2][1] == 'i') {
-            resp = ":server 324 " + conn_client->getUser() + " +i\r\n";   /// NON SI SA SE FUNZIONA BOH
+            resp = ":SovietServer 324 " + conn_client->getUser() + " +i\r\n";   /// NON SI SA SE FUNZIONA BOH
             this->serverReplyMessage(resp.c_str(), client_fd);
         }
     }
@@ -169,13 +202,6 @@ void    Server::ft_manage_user(const std::string& tmp, int client_fd, std::strin
         std::string buffer;
         buffer = tmp.substr(0, tmp.length());
         std::vector<std::string> result = ft_splitString(buffer);
-        
-       /*  std::vector<std::string> result;
-        std::stringstream ss(buffer);
-        std::string word;
-        while (ss >> word) {
-            result.push_back(word);
-        } */
         if (result.size() >= 5) {
             ft_create_map_user(result, client_fd);
             resp = "welcome to SovietServer!\r\n";
@@ -207,6 +233,7 @@ int Server::handle_client_request(int client_fd) {
     }
     else {
         //buffer[num_bytes] = '\0';   //// VERIFICARE, LO DICE CHATGPT
+        std::cout << "--->>> RICEVUTO QUESTO MESSAGGIO DAL CLIENT: " << client_fd << " <<<---\n" << buffer << std::endl;
         std::string tmp = buffer;
         std::string resp;
         std::vector<std::string> buffer_splitted = ft_splitBuffer(tmp);
@@ -227,6 +254,12 @@ int Server::handle_client_request(int client_fd) {
             else if (buffer_splitted[i].find("PING") == 0) {
                ft_manage_ping(buffer_splitted[i], client_fd);
             }
+            else if (buffer_splitted[i].find("JOIN") == 0) {
+                ft_manage_join(buffer_splitted[i], client_fd);
+            }
+            else if (buffer_splitted[i].find("PART") == 0) {
+                ft_manage_part(buffer_splitted[i], client_fd);
+            }
             else if (buffer_splitted[i].find("QUIT") == 0) {
                return -1;
             }
@@ -242,14 +275,15 @@ int Server::handle_client_request(int client_fd) {
             extract_name_from_user = conn_client->getFull().substr(colonPosition + 1);
         }
         
-        std::cout << "--->>> RICEVUTO QUESTO MESSAGGIO DAL CLIENT: " << client_fd << " <<<---\n" << buffer << std::endl;
         //const char* response = resp.c_str();
         if (conn_client->getNick().size() > 0 && conn_client->getPrinted() == false ) {
             conn_client->setPrinted(true);
             ft_print_welcome_msg(extract_name_from_user, client_fd);
         }
-        else
-            this->serverReplyMessage(":server "/* response */, client_fd);
+        //else
+        //    this->serverReplyMessage(":server "/* response */, client_fd);
+        
+        
         /* if (conn_client->getPrinted() == false) {       ///////////SOLO PER TEST A CASA , DECOMMENTARE ELSE
             conn_client->setPrinted(true);
             ft_print_welcome_msg(extract_name_from_user, client_fd);}*/

@@ -8,12 +8,13 @@
 #include <vector>
 #include <sys/poll.h>
 #include <map>
-#include "Client.hpp"
 #include <string.h>
 #include <unistd.h>
 #include <netdb.h>
 #include <sstream>
 #include <cctype>
+#include "Channel.hpp"
+#include "Client.hpp"
 #include "utils.hpp"
 
 class Server {
@@ -24,6 +25,7 @@ private:
     std::string password;
     std::vector<pollfd> poll_vec;
     std::map<int, Client *> connected_clients;
+    std::map<std::string, Channel *> channels;
     
     void    serverReplyMessage(const char* response, int client_fd);
     int     handle_client_request(int client_fd);
@@ -32,7 +34,9 @@ private:
     void    ft_manage_user(const std::string& tmp, int client_fd, std::string& resp);
     void    ft_manage_pass(const std::string& tmp, int client_fd, std::string& resp);
     void    ft_manage_mode(const std::string& tmp, int client_fd);
+    void    ft_manage_join(const std::string& tmp, int client_fd);
     void    ft_manage_ping(const std::string& tmp, int client_fd);
+    void    ft_manage_part(const std::string& tmp, int client_fd);
     void    ft_create_map_user(std::vector<std::string> result, int client_fd);
     bool    sendAll(const char* resp);
     void    ft_delete_client(int client_fd);
