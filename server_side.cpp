@@ -51,7 +51,7 @@ void Server::ft_print_welcome_msg(const std::string& extract_name_from_user, int
     std::string resp;
     resp = ":SovietServer 001 " + conn_client->getNick() + " Welcome to the Soviet Network, " + conn_client->getNick() + "!\r\n"
     + ":SovietServer 311 " + conn_client->getNick() + " " + conn_client->getNick() + " Soviet server * " + extract_name_from_user + "\r\n"
-    + ":SovietServer 312 " + conn_client->getNick() + " " + conn_client->getNick() + " Soviet server :Server Description\r\n"
+    + ":SovietServer 312 " + conn_client->getNick() + " " + conn_client->getNick() + " Soviet server :A very badass server...\r\n"
     + ":SovietServer 318 " + conn_client->getNick() + " " + conn_client->getNick() + " :End of WHOIS list\r\n";
     this->serverReplyMessage(resp.c_str(), client_fd);
 }
@@ -89,7 +89,7 @@ void    Server::ft_manage_ping(const std::string& tmp, int client_fd) {
     std::string resp;
     std::vector<std::string> tmp_splitted = ft_splitBuffer(tmp);
     if (tmp_splitted.size() == 2) {
-        resp = ":SovietServer PONG SovietServer :Server Description\r\n";// + tmp_splitted[1];   /// QUI NON VA MESSO \R\N PERCHE' E' DENTRO LA STRINGA, CREDO
+        resp = ":SovietServer PONG SovietServer\r\n";// + tmp_splitted[1];   /// QUI NON VA MESSO \R\N PERCHE' E' DENTRO LA STRINGA, CREDO /*  :Server Description */
         this->serverReplyMessage(resp.c_str(), client_fd);
     }
 }
@@ -157,9 +157,9 @@ void    Server::ft_manage_pass(const std::string& buffer, int client_fd, std::st
     }
 }
 
-void    Server::ft_manage_nick(const std::string& buffer, int client_fd, std::string& resp) {
+void    Server::ft_manage_nick(const std::string& buffer, int client_fd/* , std::string& resp */) {
     Client* conn_client = this->connected_clients.at(client_fd);
-    if (conn_client->getNick() == "") {
+    //if (conn_client->getNick() == "") {   ////    TOLTO IF PERCHE' IL NICK SI PUÒ CAMBIARE SEMPRE
         if (buffer.length() > 5) {
             conn_client->setNickname(buffer.substr(buffer.find(" ") + 1));
             std::cout << "\nNick accepted" << std::endl;    ////SOLO PER DEBUG
@@ -168,11 +168,11 @@ void    Server::ft_manage_nick(const std::string& buffer, int client_fd, std::st
         else {
             std::cout << "\nnot enough parameters, kicked!" << std::endl;   ////SOLO PER DEBUG
         }
-    }
-    else {
-        std::cout << "\nYou already inserted nick, skip..." << std::endl;   ////SOLO PER DEBUG
-        resp = "";  ////    questa messa solo per compilare, sarà da implementare
-    }
+    //}
+    //else {
+    //    std::cout << "\nYou already inserted nick, skip..." << std::endl;   ////SOLO PER DEBUG
+    //    resp = "";  ////    questa messa solo per compilare, sarà da implementare
+    //}
 }
 
 void    Server::ft_create_map_user(std::vector<std::string> result, int client_fd) {
@@ -248,7 +248,7 @@ int Server::handle_client_request(int client_fd) {
             }
         for (size_t i = 0; i < buffer_splitted.size(); ++i) {
             if (buffer_splitted[i].find("NICK") == 0) {
-               ft_manage_nick(buffer_splitted[i], client_fd, resp);
+               ft_manage_nick(buffer_splitted[i], client_fd/* , resp */);
             }
             else if (buffer_splitted[i].find("USER") == 0) {
                ft_manage_user(buffer_splitted[i], client_fd, resp);
@@ -290,11 +290,6 @@ int Server::handle_client_request(int client_fd) {
         }
         //else
         //    this->serverReplyMessage(":server "/* response */, client_fd);
-        
-        
-        /* if (conn_client->getPrinted() == false) {       ///////////SOLO PER TEST A CASA , DECOMMENTARE ELSE
-            conn_client->setPrinted(true);
-            ft_print_welcome_msg(extract_name_from_user, client_fd);}*/
     }
     return 0;
 }

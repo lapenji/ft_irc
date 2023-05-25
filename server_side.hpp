@@ -30,7 +30,7 @@ private:
     void    serverReplyMessage(const char* response, int client_fd);
     int     handle_client_request(int client_fd);
     void    setSocket();
-    void    ft_manage_nick(const std::string& tmp, int client_fd, std::string& resp);
+    void    ft_manage_nick(const std::string& tmp, int client_fd/* , std::string& resp */);
     void    ft_manage_user(const std::string& tmp, int client_fd, std::string& resp);
     void    ft_manage_pass(const std::string& tmp, int client_fd, std::string& resp);
     void    ft_manage_mode(const std::string& tmp, int client_fd);
