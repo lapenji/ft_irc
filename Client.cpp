@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int fd, const std::string& hostname, int port) : fd(fd), password(""), hostname(hostname), port(port), printed(false) {}
+Client::Client(int fd, const std::string& hostname, int port) : fd(fd), password(""), hostname(hostname), port(port), printed(false), cap(false) {}
 
 Client::~Client() {}
 
@@ -36,6 +36,10 @@ bool    Client::getPrinted() {
     return this->printed;
 }
 
+bool    Client::getCap() {
+    return this->cap;
+}
+
 void    Client::setUserName(const std::string& user) {
     this->username = user;
 }
@@ -50,4 +54,8 @@ void    Client::setServerName(const std::string& servername) {
 
 void    Client::setPrinted(bool printed) {
     this->printed = printed;
+}
+
+void    Client::setCap(bool cap) {
+    this->cap = cap;
 }

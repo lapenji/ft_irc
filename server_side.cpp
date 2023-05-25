@@ -100,14 +100,16 @@ void    Server::ft_manage_part(const std::string& tmp, int client_fd) {
     std::string resp;
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     resp = ":SovietServer PART " + tmp_splitted[1] + " " +  conn_client->getNick() + "\r\n";
-    /* std::map<std::string, Channel *>::iterator it = this->channels.begin();
+    //resp = ":" + conn_client->getNick() + " PART " + tmp_splitted[1] + "\r\n";
+    std::map<std::string, Channel *>::iterator it = this->channels.begin();
     while (it != this->channels.end()) {
         if (it->first == tmp_splitted[1]) {
             delete it->second;
             this->channels.erase(it);
+            break;
         }
         it++;
-    } */
+    }
 
     this->serverReplyMessage(resp.c_str(), client_fd);
 }
@@ -218,6 +220,7 @@ void    Server::ft_manage_user(const std::string& tmp, int client_fd, std::strin
 }
 
 int Server::handle_client_request(int client_fd) {
+   
     Client* conn_client = this->connected_clients.at(client_fd);
     char buffer[1024];
     bzero(buffer, 1024);
@@ -237,7 +240,12 @@ int Server::handle_client_request(int client_fd) {
         std::string tmp = buffer;
         std::string resp;
         std::vector<std::string> buffer_splitted = ft_splitBuffer(tmp);
-
+        if (this->connected_clients.at(client_fd)->getCap() == false) {
+                //std::cout << "entrato" << std::endl;
+                std::string resp = "IRC CAP REQ :none\r\n";
+                this->serverReplyMessage(resp.c_str(), client_fd);
+                this->connected_clients.at(client_fd)->setCap(true);
+            }
         for (size_t i = 0; i < buffer_splitted.size(); ++i) {
             if (buffer_splitted[i].find("NICK") == 0) {
                ft_manage_nick(buffer_splitted[i], client_fd, resp);
