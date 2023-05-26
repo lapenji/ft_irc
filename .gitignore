@@ -1,5 +1,6 @@
 #eseguibile finale
 ircserv
+.nfs*
 
 # Prerequisites
 *.d

@@ -96,11 +96,12 @@ void    Server::ft_manage_ping(const std::string& tmp, int client_fd) {
 
 void    Server::ft_manage_part(const std::string& tmp, int client_fd) {
     /////////////GESTIRE IL MESSAGGIO TIPO /leave ciao
+    std::cout << "entro" << std::endl;
     Client* conn_client = this->connected_clients.at(client_fd);
     std::string resp;
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     resp = ":SovietServer PART " + tmp_splitted[1] + " " +  conn_client->getNick() + "\r\n";
-    //resp = ":" + conn_client->getNick() + " PART " + tmp_splitted[1] + "\r\n";
+    //resp = ":SovietServer PART " + conn_client->getNick() + " " + tmp_splitted[1] + "\r\n";
     std::map<std::string, Channel *>::iterator it = this->channels.begin();
     while (it != this->channels.end()) {
         if (it->first == tmp_splitted[1]) {
@@ -159,6 +160,13 @@ void    Server::ft_manage_pass(const std::string& buffer, int client_fd, std::st
 
 void    Server::ft_manage_nick(const std::string& buffer, int client_fd/* , std::string& resp */) {
     Client* conn_client = this->connected_clients.at(client_fd);
+    if (conn_client->getNick() != "") { /////// QUESTO IF E' UN TENTATIVO DI GESTIRE IL CAMBIO NICK, SEMBRA FUNZIONARE MA NON TROPPO...
+        conn_client->setNickname(buffer.substr(buffer.find(" ") + 1));
+        std::string resp = ":SovietServer 311 " + conn_client->getNick() + " " + conn_client->getNick() + " Soviet server * " + conn_client->getUser() + "\r\n"
+        + ":SovietServer 312 " + conn_client->getNick() + " " + conn_client->getNick() + " Soviet server :A very badass server...\r\n"
+    + ":SovietServer 318 " + conn_client->getNick() + " " + conn_client->getNick() + " :End of WHOIS list\r\n";
+        this->serverReplyMessage(resp.c_str(), client_fd);
+    }
     //if (conn_client->getNick() == "") {   ////    TOLTO IF PERCHE' IL NICK SI PUÒ CAMBIARE SEMPRE
         if (buffer.length() > 5) {
             conn_client->setNickname(buffer.substr(buffer.find(" ") + 1));
@@ -284,7 +292,7 @@ int Server::handle_client_request(int client_fd) {
         }
         
         //const char* response = resp.c_str();
-        if (conn_client->getNick().size() > 0 && conn_client->getPrinted() == false ) {
+        if (conn_client->getNick().size() > 0 && conn_client->getFull().size() > 0 && conn_client->getPrinted() == false ) {
             conn_client->setPrinted(true);
             ft_print_welcome_msg(extract_name_from_user, client_fd);
         }
