@@ -1,18 +1,18 @@
-#ifndef SERVER_SIDE_HPP
-#define SERVER_SIDE_HPP
-#include <sys/socket.h>
-#include <netinet/in.h>
+#ifndef SERVER_HPP
+#define SERVER_HPP
 #include <iostream>
 #include <cstdlib>
-#include <strings.h>
 #include <vector>
-#include <sys/poll.h>
 #include <map>
+#include <sstream>
+#include <cctype>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/poll.h>
 #include <string.h>
 #include <unistd.h>
 #include <netdb.h>
-#include <sstream>
-#include <cctype>
+#include <strings.h>
 #include "Channel.hpp"
 #include "Client.hpp"
 #include "utils.hpp"
@@ -40,7 +40,7 @@ private:
     void    ft_create_map_user(std::vector<std::string> result, int client_fd);
     bool    sendAll(const char* resp);
     void    ft_delete_client(int client_fd);
-    void    ft_print_welcome_msg(const std::string& extract_name_from_user, int client_fd);
+    void    ft_print_welcome_msg(int client_fd);
 
 public:
     Server(int port, const std::string& password);
