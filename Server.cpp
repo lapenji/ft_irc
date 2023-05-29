@@ -119,10 +119,10 @@ void    Server::ft_manage_privmsg(const std::string& tmp, int client_fd) {
 
 void    Server::ft_manage_part(const std::string& tmp, int client_fd) {
     /////////////GESTIRE IL MESSAGGIO TIPO /leave ciao
-    Client* conn_client = this->connected_clients.at(client_fd);
+    //Client* conn_client = this->connected_clients.at(client_fd);
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
-    std::string resp = ":SovietServer PART " + tmp_splitted[1] + " " +  conn_client->getNick() + "\r\n";
-    this->serverReplyMessage(resp.c_str(), client_fd);
+    // std::string resp = ":SovietServer PART " + tmp_splitted[1] + " " +  conn_client->getNick() + "\r\n";
+    // this->serverReplyMessage(resp.c_str(), client_fd);
     // CANCELLO CLIENT
     // std::map<std::string, Channel *>::iterator it = this->channels.begin();
     // while (it != this->channels.end()) {
@@ -145,7 +145,7 @@ void    Server::ft_manage_join(const std::string& tmp, int client_fd) {
     else {
         this->channels.at(tmp_splitted[1])->addClient(conn_client);
     }
-    std::string resp = ":" + this->connected_clients.at(client_fd)->getNick() + " JOIN " + tmp_splitted[1] + "\r\n"
+    std::string resp = ":" + this->connected_clients.at(client_fd)->getNick() + "!" + this->connected_clients.at(client_fd)->getUser() + " JOIN " + tmp_splitted[1] + "\r\n"
     + ":SovietServer 332 " + conn_client->getUser() + " " + tmp_splitted[1] + " :Dear " + conn_client->getNick() + ", you just entered in the channel "
     + tmp_splitted[1] + " of our SovietServer, feel comfortable...\r\n"
     + ":SovietServer 353 " + conn_client->getUser() + " = " + tmp_splitted[1] + " :" + this->channels.at(tmp_splitted[1])->getUsers() + "\r\n" //QUI CI VUOLE LA LISTA DI TUTTI GLI UTENTI
@@ -160,7 +160,7 @@ void    Server::ft_manage_join(const std::string& tmp, int client_fd) {
 void    Server::ft_manage_ping(const std::string& tmp, int client_fd) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     if (tmp_splitted.size() == 2) {
-        this->serverReplyMessage(":SovietServer PONG SovietServer\r\n", client_fd);
+        this->serverReplyMessage(":SovietServer PONG SovietServer :SovietServer\r\n", client_fd);
     }
 }
 
