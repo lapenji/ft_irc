@@ -124,33 +124,38 @@ void    Server::ft_manage_part(const std::string& tmp, int client_fd) {
     std::string resp = ":SovietServer PART " + tmp_splitted[1] + " " +  conn_client->getNick() + "\r\n";
     this->serverReplyMessage(resp.c_str(), client_fd);
     // CANCELLO CLIENT
-    std::map<std::string, Channel *>::iterator it = this->channels.begin();
-    while (it != this->channels.end()) {
-        if (it->first == tmp_splitted[1]) {
-            delete it->second;
-            this->channels.erase(it);
-            break;
-        }
-        it++;
-    }
+    // std::map<std::string, Channel *>::iterator it = this->channels.begin();
+    // while (it != this->channels.end()) {
+    //     if (it->first == tmp_splitted[1]) {
+    //         delete it->second;
+    //         this->channels.erase(it);
+    //         break;
+    //     }
+    //     it++;
+    // }
+    this->channels.at(tmp_splitted[1])->removeClient(this->connected_clients.at(client_fd));
 }
 
 void    Server::ft_manage_join(const std::string& tmp, int client_fd) {
     Client* conn_client = this->connected_clients.at(client_fd);
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
-    std::string resp = ":SovietServer 332 " + conn_client->getUser() + " " + tmp_splitted[1] + " :Dear " + conn_client->getNick() + ", you just entered in the channel "
-    + tmp_splitted[1] + " of our SovietServer, feel comfortable...\r\n"
-    + ":SovietServer 353 " + conn_client->getUser() + " = " + tmp_splitted[1] + " :@" + conn_client->getUser() + "\r\n" //QUI CI VUOLE LA LISTA DI TUTTI GLI UTENTI
-    + ":SovietServer 366 " + conn_client->getUser() + " = " + tmp_splitted[1] + " :End of /NAMES list.\r\n";
     if (this->channels.find(tmp_splitted[1]) == this->channels.end())  {
-        this->channels.insert(std::make_pair(tmp_splitted[1], new Channel(conn_client)));
+        this->channels.insert(std::make_pair(tmp_splitted[1], new Channel(conn_client, tmp_splitted[1])));
     }
     else {
         this->channels.at(tmp_splitted[1])->addClient(conn_client);
     }
+    std::string resp = ":" + this->connected_clients.at(client_fd)->getNick() + " JOIN " + tmp_splitted[1] + "\r\n"
+    + ":SovietServer 332 " + conn_client->getUser() + " " + tmp_splitted[1] + " :Dear " + conn_client->getNick() + ", you just entered in the channel "
+    + tmp_splitted[1] + " of our SovietServer, feel comfortable...\r\n"
+    + ":SovietServer 353 " + conn_client->getUser() + " = " + tmp_splitted[1] + " :" + this->channels.at(tmp_splitted[1])->getUsers() + "\r\n" //QUI CI VUOLE LA LISTA DI TUTTI GLI UTENTI
+    + ":SovietServer 366 " + conn_client->getUser() + " " + tmp_splitted[1] + " :End of /NAMES list\r\n";
     this->serverReplyMessage(resp.c_str(), client_fd);
+
     printMap(this->channels);
 }
+
+
 
 void    Server::ft_manage_ping(const std::string& tmp, int client_fd) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);

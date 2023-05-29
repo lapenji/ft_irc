@@ -42,6 +42,7 @@ private:
     bool    sendAll(const char* resp);
     void    ft_delete_client(int client_fd);
     void    ft_print_welcome_msg(int client_fd);
+    void    ft_refresh_chan(std::string channel, std::string joiner);
 
 public:
     Server(int port, const std::string& password);

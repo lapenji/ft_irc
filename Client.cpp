@@ -1,6 +1,8 @@
 #include "Client.hpp"
 
-Client::Client(int fd, const std::string& hostname, int port) : fd(fd), password(""), hostname(hostname), port(port), printed(false), cap(false) {}
+Client::Client(int fd, const std::string& hostname, int port) : fd(fd), password(""), hostname(hostname), port(port), printed(false), cap(false) {
+
+}
 
 Client::~Client() {}
 
