@@ -83,20 +83,31 @@ void Server::ft_delete_client(int client_fd) {
     return true;
 } */
 
+std::string ft_joinStr(std::vector<std::string> result, int i) {
+    std::string tmp = "";
+    std::vector<std::string>::iterator it = result.begin() + i;
+        while (it != result.end()) {
+            //std::cout << "entro e stampo " << *it << std::endl;
+            tmp += *it;
+            if (it + 1 != result.end()) {
+                tmp += " ";
+            }
+            it++;
+        }
+    return tmp;
+}
+
 void    Server::ft_manage_privmsg(const std::string& tmp, int client_fd) {
-    //Client* conn_client = this->connected_clients.at(client_fd);
-    std::vector<std::string> tmp_splitted = ft_splitString(tmp);   
+    std::vector<std::string> tmp_splitted = ft_splitString(tmp);
+    std::string msg = ft_joinStr(tmp_splitted, 2);
     if (this->channels.find(tmp_splitted[1]) != this->channels.end()) {
         std::map<int, Client*>::iterator it = this->channels.at(tmp_splitted[1])->clients.begin();
-        std::cout << "DA PRIVMSGMANAGER" << std::endl;
+        //std::cout << "DA PRIVMSGMANAGER" << std::endl;
         this->channels.at(tmp_splitted[1])->printChanUsers();
         while (it != this->channels.at(tmp_splitted[1])->clients.end()) {
-            std::cout << "entro in funzione" << std::endl;
+            //std::cout << "entro in funzione" << std::endl;
             if (it->first != client_fd) {
-                std::cout << "entro" << std::endl;
-                std::cout << "il nick che scrive = " << this->connected_clients.at(client_fd)->getNick() << std::endl;
-                std::string resp = ":" + this->connected_clients.at(client_fd)->getNick() + " PRIVMSG " + tmp_splitted[1] + " :ciao" + "\r\n";
-                //std::string resp = ":" + this->connected_clients.at(client_fd)->getNick() + "PRIVMSG" + tmp_splitted[1] + " :ciao" + "\r\n";
+                std::string resp = ":" + this->connected_clients.at(client_fd)->getNick() + " PRIVMSG " + tmp_splitted[1] + " " + msg + "\r\n";
                 this->serverReplyMessage(resp.c_str(), it->first);
             }
             it++;
@@ -184,23 +195,14 @@ void    Server::ft_create_map_user(std::vector<std::string> result, int client_f
     conn_client->setHostname(result[2]);
     conn_client->setServerName(result[3]);
     if (result.size() > 5) {
-        std::string tmp = "";
-        std::vector<std::string>::iterator it = result.begin() + 1; // era + 4 ma ho messo + 1 cosi' abbiamo tutto il campo USER mandato dal client
-        while (it != result.end()) {
-            //std::cout << "entro e stampo " << *it << std::endl;
-            tmp += *it;
-            if (it + 1 != result.end()) {
-                tmp += " ";
-            }
-            it++;
-        }
+        std::string tmp = ft_joinStr(result, 1);
         conn_client->setFullName(tmp);   
     }
     else
         conn_client->setFullName(result[4]);        ///////NON SI SA SE SERVE O NO, PER ME NO
 }
 
-void    Server::ft_manage_user(const std::string& tmp, int client_fd/* , std::string& resp */) {
+void    Server::ft_manage_user(const std::string& tmp, int client_fd) {
     Client* conn_client = this->connected_clients.at(client_fd);
     if (conn_client->getFull() == "") {
         std::vector<std::string> result = ft_splitString(tmp);
@@ -214,10 +216,9 @@ void    Server::ft_manage_user(const std::string& tmp, int client_fd/* , std::st
     //else {
     //    resp = "you already register\r\n";  /////DA RIVEDERE
     //}
-    
 }
 
-void    Server::ft_manage_nick(const std::string& tmp, int client_fd/* , std::string& resp */) {
+void    Server::ft_manage_nick(const std::string& tmp, int client_fd) {
     Client* conn_client = this->connected_clients.at(client_fd);
     if (conn_client->getNick() != "") { /////// QUESTO IF E' UN TENTATIVO DI GESTIRE IL CAMBIO NICK, SEMBRA FUNZIONARE MA NON TROPPO, FORSE ALCUNI DI QUESTE REPLY NON SERVONO...
         conn_client->setNickname(tmp.substr(tmp.find(" ") + 1)); 
@@ -266,13 +267,13 @@ int Server::handle_client_request(int client_fd) {
         }
         for (size_t i = 0; i < buffer_splitted.size(); ++i) {
             if (buffer_splitted[i].find("NICK") == 0) {
-               ft_manage_nick(buffer_splitted[i], client_fd/* , resp */);
+               ft_manage_nick(buffer_splitted[i], client_fd);
             }
             else if (buffer_splitted[i].find("USER") == 0) {
-               ft_manage_user(buffer_splitted[i], client_fd/* , resp */);
+               ft_manage_user(buffer_splitted[i], client_fd);
             }
             else if (buffer_splitted[i].find("PASS") == 0) {
-               ft_manage_pass(buffer_splitted[i], client_fd/* , resp */);
+               ft_manage_pass(buffer_splitted[i], client_fd);
             }
             else if (buffer_splitted[i].find("MODE") == 0) {
                ft_manage_mode(buffer_splitted[i], client_fd);
