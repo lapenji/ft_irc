@@ -37,6 +37,7 @@ private:
     void    ft_manage_join(const std::string& tmp, int client_fd);
     void    ft_manage_ping(const std::string& tmp, int client_fd);
     void    ft_manage_part(const std::string& tmp, int client_fd);
+    void    ft_manage_privmsg(const std::string& tmp, int client_fd);
     void    ft_create_map_user(std::vector<std::string> result, int client_fd);
     bool    sendAll(const char* resp);
     void    ft_delete_client(int client_fd);

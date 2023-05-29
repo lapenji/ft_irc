@@ -83,6 +83,29 @@ void Server::ft_delete_client(int client_fd) {
     return true;
 } */
 
+void    Server::ft_manage_privmsg(const std::string& tmp, int client_fd) {
+    //Client* conn_client = this->connected_clients.at(client_fd);
+    std::vector<std::string> tmp_splitted = ft_splitString(tmp);   
+    if (this->channels.find(tmp_splitted[1]) != this->channels.end()) {
+        std::map<int, Client*>::iterator it = this->channels.at(tmp_splitted[1])->clients.begin();
+        std::cout << "DA PRIVMSGMANAGER" << std::endl;
+        this->channels.at(tmp_splitted[1])->printChanUsers();
+        while (it != this->channels.at(tmp_splitted[1])->clients.end()) {
+            std::cout << "entro in funzione" << std::endl;
+            if (it->first != client_fd) {
+                std::cout << "entro" << std::endl;
+                std::cout << "il nick che scrive = " << this->connected_clients.at(client_fd)->getNick() << std::endl;
+                std::string resp = ":" + this->connected_clients.at(client_fd)->getNick() + " PRIVMSG " + tmp_splitted[1] + " :ciao" + "\r\n";
+                //std::string resp = ":" + this->connected_clients.at(client_fd)->getNick() + "PRIVMSG" + tmp_splitted[1] + " :ciao" + "\r\n";
+                this->serverReplyMessage(resp.c_str(), it->first);
+            }
+            it++;
+        }
+    }
+
+}
+
+
 void    Server::ft_manage_part(const std::string& tmp, int client_fd) {
     /////////////GESTIRE IL MESSAGGIO TIPO /leave ciao
     Client* conn_client = this->connected_clients.at(client_fd);
@@ -107,8 +130,13 @@ void    Server::ft_manage_join(const std::string& tmp, int client_fd) {
     std::string resp = ":SovietServer 332 " + conn_client->getUser() + " " + tmp_splitted[1] + " :Dear " + conn_client->getNick() + ", you just entered in the channel "
     + tmp_splitted[1] + " of our SovietServer, feel comfortable...\r\n"
     + ":SovietServer 353 " + conn_client->getUser() + " = " + tmp_splitted[1] + " :@" + conn_client->getUser() + "\r\n" //QUI CI VUOLE LA LISTA DI TUTTI GLI UTENTI
-    + ":SovietServer 366 " + conn_client->getUser() + " = " + tmp_splitted[1] + " :End of /NAMES list.\r\n"; 
-    this->channels.insert(std::make_pair(tmp_splitted[1], new Channel()));
+    + ":SovietServer 366 " + conn_client->getUser() + " = " + tmp_splitted[1] + " :End of /NAMES list.\r\n";
+    if (this->channels.find(tmp_splitted[1]) == this->channels.end())  {
+        this->channels.insert(std::make_pair(tmp_splitted[1], new Channel(conn_client)));
+    }
+    else {
+        this->channels.at(tmp_splitted[1])->addClient(conn_client);
+    }
     this->serverReplyMessage(resp.c_str(), client_fd);
 }
 
@@ -256,6 +284,9 @@ int Server::handle_client_request(int client_fd) {
             }
             else if (buffer_splitted[i].find("PART") == 0) {
                 ft_manage_part(buffer_splitted[i], client_fd);
+            }
+            else if (buffer_splitted[i].find("PRIVMSG") == 0) {
+               ft_manage_privmsg(buffer_splitted[i], client_fd);
             }
             else if (buffer_splitted[i].find("QUIT") == 0) {
                return -1;

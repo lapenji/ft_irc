@@ -3,11 +3,13 @@
 
 class Channel {
 private:
-    std::map<int, Client *> users;
     std::string             password;
     std::map<int, Client *> admins;
 
 public:
-    Channel();
+    std::map<int, Client *> clients;
+    Channel(Client * client);
     ~Channel();
+    void    addClient(Client* client);
+    void    printChanUsers();
 };
