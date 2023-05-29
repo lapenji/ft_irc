@@ -59,3 +59,7 @@ void    Client::setPrinted(bool printed) {
 void    Client::setCap(bool cap) {
     this->cap = cap;
 }
+
+int     Client::getFd() {
+    return this->fd;
+}

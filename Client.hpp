@@ -32,6 +32,7 @@ class Client {
     const std::string&  getPass();
     bool    getPrinted();   ////TEST
     bool    getCap();
+    int     getFd();
 };
 
 #endif
