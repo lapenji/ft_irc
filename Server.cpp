@@ -110,6 +110,7 @@ void    Server::ft_manage_join(const std::string& tmp, int client_fd) {
     + ":SovietServer 366 " + conn_client->getUser() + " = " + tmp_splitted[1] + " :End of /NAMES list.\r\n"; 
     this->channels.insert(std::make_pair(tmp_splitted[1], new Channel()));
     this->serverReplyMessage(resp.c_str(), client_fd);
+    printMap(this->channels);
 }
 
 void    Server::ft_manage_ping(const std::string& tmp, int client_fd) {
@@ -228,7 +229,7 @@ int Server::handle_client_request(int client_fd) {
         return -1;
     }
     else {
-        std::cout << "--->>> RICEVUTO QUESTO MESSAGGIO DAL CLIENT: " << client_fd << " <<<---\n" << buffer << std::endl;
+        std::cout << "\033[1;31m--->>> RICEVUTO QUESTO MESSAGGIO DAL CLIENT: " << client_fd << " <<<---\n\033[0m" << buffer << std::endl;
         std::string tmp = buffer;
         std::vector<std::string> buffer_splitted = ft_splitBuffer(tmp);
         if (conn_client->getCap() == false) {

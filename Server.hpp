@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <strings.h>
-#include "Channel.hpp"
+//#include "Channel.hpp"
 #include "Client.hpp"
 #include "utils.hpp"
 
