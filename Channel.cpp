@@ -37,6 +37,9 @@ Channel::Channel(Client * client, std::string name) {
     this->name = name;
     this->clients.insert(std::make_pair(client->getFd(), client));
     this->topic = "Welcome to " + name;
+    this->freeTopic = false;
+    this->needPassword = false;
+    this->inviteOnly = false;
     if (this->admins.empty()) {
         this->addAdmin(client);
     }
@@ -69,7 +72,6 @@ void    Channel::removeClient(Client* client) {
 }
 
 void    Channel::changeTopic(const std::string& topic, int changer) {
-    this->topic = topic;
     std::string resp;
     Client* conn_client = this->clients.at(changer);
     if (this->admins.find(changer) == this->admins.end()) {
@@ -79,6 +81,7 @@ void    Channel::changeTopic(const std::string& topic, int changer) {
     else {
         resp = ":" + conn_client->getNick() + "!" + conn_client->getUser() + " TOPIC " + this->name + " :" + topic + "\n";
         std::map<int, Client *>::iterator it = this->clients.begin();
+        this->topic = topic;
         while (it != this->clients.end()) {
             sendMessage(resp.c_str(), it->first);
             it++;
@@ -131,5 +134,13 @@ bool    Channel::isUserInChan(int user) {
     }
     return false;
 }
+
+bool    Channel::isUserAdmin(int user) {
+    if (this->admins.find(user) != this->admins.end()) {
+        return true;
+    }
+    return false;
+}
+
 
 Channel::~Channel() {}

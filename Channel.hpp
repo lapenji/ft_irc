@@ -8,6 +8,9 @@ private:
     std::map<int, Client *> admins;
     std::string             name;
     std::string             topic;
+    bool                    inviteOnly;
+    bool                    freeTopic;
+    bool                    needPassword;
 public:
     std::map<int, Client *> clients;
     Channel(Client * client, std::string name);
@@ -23,4 +26,5 @@ public:
     bool    checkIfAdmin(int user);
     void    removeFromChan(int user);
     bool    isUserInChan(int user);
+    bool    isUserAdmin(int user);
 };

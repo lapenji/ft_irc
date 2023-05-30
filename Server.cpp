@@ -76,17 +76,29 @@ void    Server::ft_manage_topic(const std::string& tmp, int client_fd) {
 void    Server::ft_manage_kick(const std::string& tmp, int client_fd) {
     Client* conn_client = this->connected_clients.at(client_fd);
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
-    std::string resp = ":" + conn_client->getNick() + "!" + conn_client->getUser() + " KICK " + tmp_splitted[1] + " " + tmp_splitted[2] + " :" + conn_client->getNick() + "\n";
-    this->serverReplyMessage(resp.c_str(), client_fd);
-    std::map<int, Client *>::iterator it = this->connected_clients.begin();
-    while (it != this->connected_clients.end()) {
-        if (it->second->getNick() == tmp_splitted[2]) {
-            this->serverReplyMessage(resp.c_str(), it->second->getFd());
-            this->channels.at(tmp_splitted[1])->removeFromChan(it->second->getFd());
+    if (this->channels.find(tmp_splitted[1]) != this->channels.end()) {
+        if (this->channels.at(tmp_splitted[1])->isUserAdmin(client_fd) == true) {
+
+            std::string resp = ":" + conn_client->getNick() + "!" + conn_client->getUser() + " KICK " + tmp_splitted[1] + " " + tmp_splitted[2] + " :" + conn_client->getNick() + "\n";
+            this->serverReplyMessage(resp.c_str(), client_fd);
+            std::map<int, Client *>::iterator it = this->connected_clients.begin();
+            while (it != this->connected_clients.end()) {
+                if (it->second->getNick() == tmp_splitted[2]) {
+                    this->channels.at(tmp_splitted[1])->removeFromChan(it->second->getFd());
+                }
+                this->serverReplyMessage(resp.c_str(), it->second->getFd());
+                it++;
+            }
         }
-        it++;
+        else {
+            std::string resp = ":SovietServ 482 " + conn_client->getNick() + " " + tmp_splitted[1] + " :You must be a channel operator\n";
+            this->serverReplyMessage(resp.c_str(), client_fd);
+        }
     }
-    
+    else {
+        std::string resp = ":SovietServ 401 " + conn_client->getNick() + " " + tmp_splitted[1] + " :No such channel!\n";
+        this->serverReplyMessage(resp.c_str(), client_fd);
+    }
 }
 
 void    Server::ft_manage_invite(const std::string& tmp, int client_fd) {
@@ -97,11 +109,9 @@ void    Server::ft_manage_invite(const std::string& tmp, int client_fd) {
     std::string resp2 = ":" + conn_client->getNick() + "!" + conn_client->getUser() + " INVITE " + tmp_splitted[1] + " :" + tmp_splitted[2] + "\n";
     std::map<int, Client *>::iterator it = this->connected_clients.begin();
     if (this->channels.at(tmp_splitted[2])->checkIfAdmin(client_fd) == false) {
-        std::cout << "ENTRO IN IF" << std::endl;
         resp = ":SovietServer 482 " + conn_client->getNick() + " " + tmp_splitted[2] + " :You must be admin to invite someone!\n";
     }
     else {
-        std::cout << "ENTRO IN ELSE" << std::endl;
         while (it != this->connected_clients.end()) {
             std::cout << it->second->getNick();
             if (it->second->getNick() == tmp_splitted[1]) {
@@ -151,26 +161,36 @@ std::string ft_joinStr(std::vector<std::string> result, int i) {
 }
 
 void    Server::ft_manage_privmsg(const std::string& tmp, int client_fd) {
+    std::cout << "ecco cosa mi arriva" << tmp << std::endl;
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     std::string msg = ft_joinStr(tmp_splitted, 2);
-    if (this->channels.find(tmp_splitted[1]) != this->channels.end()) {
-        std::map<int, Client*>::iterator it = this->channels.at(tmp_splitted[1])->clients.begin();
-        //std::cout << "DA PRIVMSGMANAGER" << std::endl;
-        this->channels.at(tmp_splitted[1])->printChanUsers();
-        if (this->channels.at(tmp_splitted[1])->isUserInChan(client_fd) == true) {
-            while (it != this->channels.at(tmp_splitted[1])->clients.end()) {
-                //std::cout << "entro in funzione" << std::endl;
-                if (it->first != client_fd) {
-                    std::string resp = ":" + this->connected_clients.at(client_fd)->getNick() + " PRIVMSG " + tmp_splitted[1] + " " + msg + "\n";
-                    this->serverReplyMessage(resp.c_str(), it->first);
+    if (tmp_splitted[1][0] == '#') {
+        if (this->channels.find(tmp_splitted[1]) != this->channels.end()) {
+            std::map<int, Client*>::iterator it = this->channels.at(tmp_splitted[1])->clients.begin();
+            this->channels.at(tmp_splitted[1])->printChanUsers();
+            if (this->channels.at(tmp_splitted[1])->isUserInChan(client_fd) == true) {
+                while (it != this->channels.at(tmp_splitted[1])->clients.end()) {
+                    if (it->first != client_fd) {
+                        std::string resp = ":" + this->connected_clients.at(client_fd)->getNick() + " PRIVMSG " + tmp_splitted[1] + " " + msg + "\n";
+                        this->serverReplyMessage(resp.c_str(), it->first);
+                    }
+                    it++;
                 }
-                it++;
+            }
+            else {
+                std::string resp = ":SovietServ 404 " + this->connected_clients.at(client_fd)->getNick() + " " + tmp_splitted[1] + " :Cannot send to channel (no external messages)\n";
+                this->serverReplyMessage(resp.c_str(), client_fd);
             }
         }
-        else {
-            std::string resp = ":SovietServ 404 " + this->connected_clients.at(client_fd)->getNick() + " " + tmp_splitted[1] + " :Cannot send to channel (no external messages)\n";
-            std::cout << "ECCO RESP " << resp << std::endl;
+    }
+    else {
+        if (this->find_client(tmp_splitted[1]) == -1) {
+            std::string resp = ":SovietServ 401 " + this->connected_clients.at(client_fd)->getNick() + " " + tmp_splitted[1] + " :No such nick/channel\n";
             this->serverReplyMessage(resp.c_str(), client_fd);
+        }
+        else {
+            std::string resp = ":" + this->connected_clients.at(client_fd)->getNick() + "!" + this->connected_clients.at(client_fd)->getUser() + " PRIVMSG " + tmp_splitted[1] + " " + tmp_splitted[2] + "\n";
+            this->serverReplyMessage(resp.c_str(), this->find_client(tmp_splitted[1]));
         }
     }
 
@@ -419,5 +439,14 @@ void Server::startServer() {
     }
 }
 
-
+int Server::find_client(const std::string& name) {
+    std::map<int, Client *>::iterator it = this->connected_clients.begin();
+    while (it != this->connected_clients.end()) {
+            if (it->second->getNick() == name) {
+                return it->first;
+            }
+            it++;
+    }
+    return -1;
+}
 

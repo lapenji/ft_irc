@@ -46,6 +46,7 @@ private:
     void    ft_print_welcome_msg(int client_fd);
     void    ft_refresh_chan(std::string channel, std::string joiner);
     void    ft_manage_kick(const std::string& tmp, int client_fd);
+    int     find_client(const std::string& name);
 
 public:
     Server(int port, const std::string& password);
