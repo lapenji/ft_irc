@@ -36,7 +36,7 @@ void    Channel::printChanUsers() { //FUNZIONE PER STAMPARE IL CONTENUTO DEL MAP
 Channel::Channel(Client * client, std::string name) {
     this->name = name;
     this->clients.insert(std::make_pair(client->getFd(), client));
-    this->topic = "Welcome to " + name;
+    this->topic = ":Welcome to " + name;
     this->freeTopic = false;
     this->needPassword = false;
     this->inviteOnly = false;
@@ -79,7 +79,7 @@ void    Channel::changeTopic(const std::string& topic, int changer) {
         sendMessage(resp.c_str(), changer);  
     }
     else {
-        resp = ":" + conn_client->getNick() + "!" + conn_client->getUser() + " TOPIC " + this->name + " :" + topic + "\n";
+        resp = ":" + conn_client->getNick() + "!" + conn_client->getUser() + " TOPIC " + this->name + " " + topic + "\n";
         std::map<int, Client *>::iterator it = this->clients.begin();
         this->topic = topic;
         while (it != this->clients.end()) {
