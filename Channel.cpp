@@ -31,6 +31,11 @@ void    Channel::printChanUsers() { //FUNZIONE PER STAMPARE IL CONTENUTO DEL MAP
     {
         std::cout << it->first << ": " << it->second->getNick() << " - " << it->second->getFull() << std::endl;
     }
+    for(std::map<int, Client*>::const_iterator it = this->admins.begin();
+    it != this->admins.end(); it++)
+    {
+        std::cout << "admin" << it->first << ": " << it->second->getNick() << " - " << it->second->getFull() << std::endl;
+    }
 }
 
 Channel::Channel(Client * client, std::string name) {
@@ -59,6 +64,7 @@ void    Channel::addClient(Client* client) {
         }
         it++;
     }
+    printChanUsers();
 }
 
 void    Channel::removeClient(Client* client) {
@@ -68,6 +74,7 @@ void    Channel::removeClient(Client* client) {
         sendMessage(resp.c_str(), it->first);
         it++;
     }
+    this->admins.erase(client->getFd());
     this->clients.erase(client->getFd());
 }
 
