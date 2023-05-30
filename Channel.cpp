@@ -39,7 +39,7 @@ void    Channel::addClient(Client* client) {
     std::map<int, Client *>::iterator it = this->clients.begin();
     while (it != this->clients.end()) {
         if (it->first != client->getFd()) {
-            std::string resp = ":" + client->getNick() + "!" + client->getUser() + " JOIN :" + this->name  + "\r\n";
+            std::string resp = ":" + client->getNick() + "!" + client->getUser() + " JOIN :" + this->name  + "\n";
             sendMessage(resp.c_str(), it->first);
         }
         it++;
@@ -49,7 +49,7 @@ void    Channel::addClient(Client* client) {
 void    Channel::removeClient(Client* client) {
     std::map<int, Client *>::iterator it = this->clients.begin();
     while (it != this->clients.end()) {
-        std::string resp = ":" + client->getNick() + "!" + client->getUser() + " PART " + this->name + "\r\n";
+        std::string resp = ":" + client->getNick() + "!" + client->getUser() + " PART " + this->name + "\n";
         sendMessage(resp.c_str(), it->first);
         it++;
     }

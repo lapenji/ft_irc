@@ -20,12 +20,12 @@ std::vector<std::string> ft_splitString(const std::string& str) {
 }
 
 std::vector<std::string> ft_splitBuffer(std::string tmp) {
-    size_t pos = tmp.find("\r\n");
+    size_t pos = tmp.find("\n");
     std::vector<std::string> buffer_splitted;
     while (pos != std::string::npos) {
         buffer_splitted.push_back(tmp.substr(0, pos));
-        tmp = tmp.substr(pos + 2);
-        pos = tmp.find("\r\n");
+        tmp = tmp.substr(pos + 1);
+        pos = tmp.find("\n");
     }
     // Stampa le stringhe separate
    /*  std::cout << "STAMPO" << std::endl;
