@@ -12,11 +12,16 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <strings.h>
+#include "Server.hpp"
 
 void sendMessage(const char* response, int client_fd) {
     if(send(client_fd, response, strlen(response), 0) == -1) {
         std::cerr << "->>\tError sending response to client!" << std::endl;
     }
+}
+
+void    Channel::addAdmin(Client* client) {
+    this->admins.insert(std::make_pair(client->getFd(), client));
 }
 
 void    Channel::printChanUsers() { //FUNZIONE PER STAMPARE IL CONTENUTO DEL MAP (PER CONTROLLARLO)
@@ -31,12 +36,19 @@ void    Channel::printChanUsers() { //FUNZIONE PER STAMPARE IL CONTENUTO DEL MAP
 Channel::Channel(Client * client, std::string name) {
     this->name = name;
     this->clients.insert(std::make_pair(client->getFd(), client));
+    this->topic = "Welcome to " + name;
+    if (this->admins.empty()) {
+        this->addAdmin(client);
+    }
 }
 
 
 void    Channel::addClient(Client* client) {
     this->clients.insert(std::make_pair(client->getFd(), client));
     std::map<int, Client *>::iterator it = this->clients.begin();
+    if (this->admins.empty() == true) {
+        this->addAdmin(client);
+    }
     while (it != this->clients.end()) {
         if (it->first != client->getFd()) {
             std::string resp = ":" + client->getNick() + "!" + client->getUser() + " JOIN :" + this->name  + "\n";
@@ -56,20 +68,68 @@ void    Channel::removeClient(Client* client) {
     this->clients.erase(client->getFd());
 }
 
+void    Channel::changeTopic(const std::string& topic, int changer) {
+    this->topic = topic;
+    std::string resp;
+    Client* conn_client = this->clients.at(changer);
+    if (this->admins.find(changer) == this->admins.end()) {
+        resp = ":SovietServ 482 " + conn_client->getNick() + " " + this->name + " :You do not have access to change the topic on this channel\n";
+        sendMessage(resp.c_str(), changer);  
+    }
+    else {
+        resp = ":" + conn_client->getNick() + "!" + conn_client->getUser() + " TOPIC " + this->name + " :" + topic + "\n";
+        std::map<int, Client *>::iterator it = this->clients.begin();
+        while (it != this->clients.end()) {
+            sendMessage(resp.c_str(), it->first);
+            it++;
+        }
+    }
+}
+
+bool     Channel::checkIfAdmin(int user) {
+    if (this->admins.find(user) == this->admins.end())
+        return false;
+    return true;
+}
+
 std::string Channel::getUsers() {
     std::string res = "";
-    std::map<int, Client*>::const_iterator it = this->clients.begin();
-    while (it != this->clients.end()) {
-        res += it->second->getNick();
+    std::map<int, Client*>::const_iterator ita = this->admins.begin();
+    while (ita != this->admins.end()) {
+        res += "@";
+        res += ita->second->getNick();
         res += " ";
-        it++;
+        ita++;
     }
+    std::map<int, Client*>::const_iterator it = this->clients.begin();
+        while (it != this->clients.end()) {
+            if (this->admins.find(it->first) == this->admins.end()) {
+                res += it->second->getNick();
+                res += " ";
+            }
+            it++;
+        }
+    std::cout << "ESCO DAL WHILE" << std::endl;
     if (res[0] != '\0')
         res.erase(res.end() - 1);
-    std::cout << "res = " << res << "|" << std::endl;
     return res;
 }
 
+std::string Channel::getTopic() {
+    return this->topic;
+}
 
+void    Channel::removeFromChan(int user) {
+    this->admins.erase(user);
+    this->clients.erase(user);
+}
+
+
+bool    Channel::isUserInChan(int user) {
+    if (this->clients.find(user) != this->clients.end()) {
+        return true;
+    }
+    return false;
+}
 
 Channel::~Channel() {}

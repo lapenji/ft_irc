@@ -32,17 +32,20 @@ private:
     void    setSocket();
     void    ft_manage_nick(const std::string& tmp, int client_fd/* , std::string& resp */);
     void    ft_manage_user(const std::string& tmp, int client_fd/* , std::string& resp */);
-    void    ft_manage_pass(const std::string& tmp, int client_fd/* , std::string& resp */);
+    bool    ft_manage_pass(const std::string& tmp);
     void    ft_manage_mode(const std::string& tmp, int client_fd);
     void    ft_manage_join(const std::string& tmp, int client_fd);
     void    ft_manage_ping(const std::string& tmp, int client_fd);
     void    ft_manage_part(const std::string& tmp, int client_fd);
     void    ft_manage_privmsg(const std::string& tmp, int client_fd);
+    void    ft_manage_invite(const std::string& tmp, int client_fd);
+    void    ft_manage_topic(const std::string& tmp, int client_fd);
     void    ft_create_map_user(std::vector<std::string> result, int client_fd);
     bool    sendAll(const char* resp);
     void    ft_delete_client(int client_fd);
     void    ft_print_welcome_msg(int client_fd);
     void    ft_refresh_chan(std::string channel, std::string joiner);
+    void    ft_manage_kick(const std::string& tmp, int client_fd);
 
 public:
     Server(int port, const std::string& password);
@@ -50,5 +53,6 @@ public:
     void    startServer();
 };
 
+std::string ft_joinStr(std::vector<std::string> result, int i);
 
 #endif
