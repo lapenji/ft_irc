@@ -12,9 +12,10 @@ class Client {
     std::string username;
     std::string serverName;
     int         port;
-    bool printed;
-    bool cap;
-    bool aut;
+    bool    printed;
+    bool    cap;
+    bool    aut;
+    bool    nickOk;
 
     public:
     Client(int fd, const std::string& hostname, int port);

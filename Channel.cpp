@@ -78,10 +78,10 @@ void    Channel::addClient(Client* client) {
     printChanUsers();
 }
 
-void    Channel::removeClient(Client* client) {
+void    Channel::removeClient(Client* client, const std::string& message) {
     std::map<int, Client *>::iterator it = this->clients.begin();
     while (it != this->clients.end()) {
-        std::string resp = ":" + client->getNick() + "!" + client->getUser() + " PART " + this->name + "\n";
+        std::string resp = ":" + client->getNick() + "!" + client->getUser() + " PART " + this->name + " " + message + "\n";
         sendMessage(resp.c_str(), it->first);
         it++;
     }
@@ -91,7 +91,7 @@ void    Channel::removeClient(Client* client) {
 void    Channel::changeTopic(const std::string& topic, int changer) {
     std::string resp;
     Client* conn_client = this->clients.at(changer);
-    if (this->admins.find(changer) == this->admins.end()) {
+    if (this->admins.find(changer) == this->admins.end() && this->freeTopic == false) {
         resp = ":SovietServ 482 " + conn_client->getNick() + " " + this->name + " :You do not have access to change the topic on this channel\n";
         sendMessage(resp.c_str(), changer);  
     }
@@ -145,9 +145,9 @@ void    Channel::removeFromChan(int user) {
         this->admins.erase(user);
     }
     this->clients.erase(user);
-    std::cout << "STAMPO DOPO LEAVE" << std::endl;
+    /* std::cout << "STAMPO DOPO LEAVE" << std::endl;
     this->printChanUsers();
-    std::cout << "FINE STAMPA DOPO IL LEAVE" << std::endl;
+    std::cout << "FINE STAMPA DOPO IL LEAVE" << std::endl; */
 }
 
 
@@ -170,6 +170,68 @@ bool    Channel::isEmpty() {
         return true;
     }
     return false;
+}
+
+bool    Channel::getFreeTopic() {
+    return this->freeTopic;
+}
+bool    Channel::getInviteOnly() {
+    return this->inviteOnly;
+}
+bool    Channel::getNeedPassword() {
+    return this->needPassword;
+}
+void    Channel::setFreeTopic(bool arg) {
+    this->freeTopic = arg;
+}
+void    Channel::setInviteOnly(bool arg) {
+    this->inviteOnly = arg;
+}
+void    Channel::setNeedPassword(bool arg, const std::string& password) {
+    if (arg == true) {
+        this->needPassword = true;
+        this->password = password;
+    }
+    else {
+        this->needPassword = false;
+        this->password = "";
+    }
+}
+
+void    Channel::addToInvited(const std::string& nick) {
+    this->invited.push_back(nick);
+}
+
+void    Channel::removeToInvited(const std::string& nick) {
+    std::vector<std::string>::iterator it = this->invited.begin();
+    while (it != this->invited.end()) {
+        if (*it == nick) {
+            it->erase();
+        }
+        it++;
+    }
+}
+bool    Channel::isInvited(const std::string& nick) {
+    std::vector<std::string>::iterator it = this->invited.begin();
+    while (it != this->invited.end()) {
+        if (*it == nick) {
+           return true;
+        }
+        it++;
+    }
+    return false;
+}
+
+void    Channel::setPassword(const std::string& password) {
+    this->password = password;
+}
+
+std::string&    Channel::getPassword() {
+    return this->password;
+}
+
+void    Channel::removeFromAdmin(int client) {
+    this->admins.erase(client);
 }
 
 Channel::~Channel() {}
