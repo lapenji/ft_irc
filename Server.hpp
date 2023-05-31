@@ -41,20 +41,23 @@ private:
     void    ft_manage_invite(const std::string& tmp, int client_fd);
     void    ft_manage_topic(const std::string& tmp, int client_fd);
     void    ft_create_map_user(std::vector<std::string> result, int client_fd);
-    bool    sendAll(const char* resp);
+    //bool    sendAll(const char* resp);
     void    ft_delete_client(int client_fd);
     void    ft_print_welcome_msg(int client_fd);
     void    ft_refresh_chan(std::string channel, std::string joiner);
     void    ft_manage_kick(const std::string& tmp, int client_fd);
     int     find_client(const std::string& name);
     bool    isNickInUse(const std::string &nick);
+    void    ft_manage_i(const std::string& first_part, int client_fd, Channel* chan, char c);
+    void    ft_manage_o(const std::string& first_part, int client_fd, Channel* chan, std::vector<std::string> tmp_splitted);
+    void    ft_manage_t(const std::string& first_part, int client_fd, Channel* chan, char c);
+    void    ft_manage_l(const std::string& first_part, int client_fd, Channel* chan, std::vector<std::string> tmp_splitted);
+    void    ft_manage_k(const std::string& first_part, int client_fd, Channel* chan, std::vector<std::string> tmp_splitted);
 
 public:
     Server(int port, const std::string& password);
     ~Server();
     void    startServer();
 };
-
-std::string ft_joinStr(std::vector<std::string> result, int i);
 
 #endif
