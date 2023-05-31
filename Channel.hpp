@@ -13,8 +13,10 @@ private:
     bool                        freeTopic;
     bool                        needPassword;
     std::vector<std::string>    invited;
+    int                         maxUsers;
+    bool                        userNrLimited;
 public:
-    std::map<int, Client *> clients;
+    std::map<int, Client *> clients; //DA RIMETTERE PRIVATO
     Channel(Client * client, std::string name);
     ~Channel();
     std::string ft_353_366(Client* client, const char* str);
@@ -43,4 +45,8 @@ public:
     void    setPassword(const std::string& password);
     void    removeFromAdmin(int client);
     std::string&    getPassword();
+    int             getMaxUsers();
+    bool            getUserNrLimited();
+    void            setMaxUsers(int nr);
+    void            setUserNrLimited(bool arg);
 };

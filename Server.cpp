@@ -232,6 +232,12 @@ void    Server::ft_manage_join(const std::string& tmp, int client_fd) {
         this->serverReplyMessage(resp.c_str(), client_fd);
         return;
     }
+    std::cout << "user limit ed = " << chan->clients.size() << " " << chan->getMaxUsers() << std::endl;
+    if (chan->getUserNrLimited() == true && (int)chan->clients.size() >= chan->getMaxUsers()) {
+        std::string resp = ":SovietServ 471 " + nick + " " + tmp_splitted[1] + " :Cannot join channel (Channel is full)\n";
+        this->serverReplyMessage(resp.c_str(), client_fd);
+        return;
+    }
     if (chan->getNeedPassword() == true) {
         if (tmp_splitted.size() < 3 || tmp_splitted[2] != chan->getPassword()) {
             std::string resp = ":SovietServ 475 " + nick + " " + tmp_splitted[1] + " :Cannot join channel (Incorrect channel key)\n";
@@ -324,7 +330,24 @@ void    Server::ft_manage_mode(const std::string& tmp, int client_fd) {
                     chan->setFreeTopic(false);
                 }
             }
-
+            else if (tmp_splitted[2][1] == 'l') {
+                std::cout << "ENTRO IN L" << std::endl;
+                if (tmp_splitted[2][0] == '+') {
+                    if (tmp_splitted.size() == 4) {
+                        if (isStringNumeric(tmp_splitted[3]) == true) {
+                            std::cout << "cambio numero di user permessi" << std::endl;
+                        this->channels.at(tmp_splitted[1])->setUserNrLimited(true);
+                        this->channels.at(tmp_splitted[1])->setMaxUsers(std::atoi(tmp_splitted[3].c_str()));
+                        std::string resp = first_part + " " + tmp_splitted[3] + "\n";
+                        this->serverReplyMessage(resp.c_str(), client_fd);
+                        chan->sendToAllusersExcept(resp.c_str(), client_fd);
+                        }
+                    }
+                }
+                else if (tmp_splitted[2][0] == '-') {
+                    this->channels.at(tmp_splitted[1])->setUserNrLimited(false);
+                }
+            }
             else if (tmp_splitted[2][1] == 'k') {
                 if (tmp_splitted[2][0] == '+') {
                     std::string resp = first_part + " " + tmp_splitted[3] + "\n";

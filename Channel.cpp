@@ -56,6 +56,7 @@ Channel::Channel(Client * client, std::string name) {
     this->freeTopic = false;
     this->needPassword = false;
     this->inviteOnly = false;
+    this->userNrLimited = false;
     if (this->admins.empty()) {
         this->addAdmin(client);
     }
@@ -232,6 +233,21 @@ std::string&    Channel::getPassword() {
 
 void    Channel::removeFromAdmin(int client) {
     this->admins.erase(client);
+}
+
+int             Channel::getMaxUsers() {
+    return this->maxUsers;
+}
+
+bool            Channel::getUserNrLimited() {
+    return this->userNrLimited;
+}
+
+void            Channel::setMaxUsers(int nr) {
+    this->maxUsers = nr;
+}
+void            Channel::setUserNrLimited(bool arg) {
+    this->userNrLimited = arg;
 }
 
 Channel::~Channel() {}
