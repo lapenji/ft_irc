@@ -231,7 +231,7 @@ void    Server::ft_manage_ping(const std::string& tmp, int client_fd) {
     }
 }
 
-void    Server::ft_manage_mode(const std::string& tmp, int client_fd) {
+/* void    Server::ft_manage_mode(const std::string& tmp, int client_fd) {
     Client* conn_client = this->connected_clients.at(client_fd);
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     if (tmp_splitted.size() == 3 && tmp_splitted[1] == conn_client->getNick()) {
@@ -239,6 +239,27 @@ void    Server::ft_manage_mode(const std::string& tmp, int client_fd) {
             std::string resp = ":SovietServer 324 " + conn_client->getNick() + " +i\n";   /// NON SI SA SE FUNZIONA BOH
             this->serverReplyMessage(resp.c_str(), client_fd);
         }
+    }
+} */
+
+void    Server::ft_manage_mode(const std::string& tmp, int client_fd) {
+    Client* conn_client = this->connected_clients.at(client_fd);
+    std::vector<std::string> tmp_splitted = ft_splitString(tmp);
+    std::string first_part = ":" + conn_client->getNick() + "!" + conn_client->getUser() + " MODE " + tmp_splitted[1] + " " + tmp_splitted[2][0];
+    
+    if ((tmp_splitted[2][0] == '+' && tmp_splitted[2][1] == 'i') || (tmp_splitted[2][0] == '-' && tmp_splitted[2][1] == 'i')) {
+        std::string resp = first_part + "i\n";
+        this->serverReplyMessage(resp.c_str(), client_fd);
+    }
+   
+    if ((tmp_splitted[2][0] == '+' && tmp_splitted[2][1] == 'o') || (tmp_splitted[2][0] == '-' && tmp_splitted[2][1] == 'o')) {
+        std::string resp = first_part + "o " + tmp_splitted[3] + "\n";
+        this->serverReplyMessage(resp.c_str(), client_fd);
+    }
+
+    if ((tmp_splitted[2][0] == '+' && tmp_splitted[2][1] == 't') || (tmp_splitted[2][0] == '-' && tmp_splitted[2][1] == 't')) {
+        std::string resp = first_part + "t\n";
+        this->serverReplyMessage(resp.c_str(), client_fd);
     }
 }
 
