@@ -28,4 +28,5 @@ public:
     bool    isUserInChan(int user);
     bool    isUserAdmin(int user);
     bool    isEmpty();
+    void    sendToAllusersExcept(const std::string& message, int client);
 };

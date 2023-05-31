@@ -24,6 +24,17 @@ void    Channel::addAdmin(Client* client) {
     this->admins.insert(std::make_pair(client->getFd(), client));
 }
 
+void    Channel::sendToAllusersExcept(const std::string& message, int client) {
+    std::map<int, Client *>::iterator it = this->clients.begin();
+    while (it != this->clients.end()) {
+        if (it->first != client) {
+            sendMessage(message.c_str(), it->first);
+        }
+        it++;
+    }
+}
+
+
 void    Channel::printChanUsers() { //FUNZIONE PER STAMPARE IL CONTENUTO DEL MAP (PER CONTROLLARLO)
     std::cout << "STAMPO IL MAP DEL CHAN" << std::endl;
     for(std::map<int, Client*>::const_iterator it = this->clients.begin();

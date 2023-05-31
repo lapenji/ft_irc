@@ -78,7 +78,6 @@ void    Server::ft_manage_kick(const std::string& tmp, int client_fd) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     if (this->channels.find(tmp_splitted[1]) != this->channels.end()) {
         if (this->channels.at(tmp_splitted[1])->isUserAdmin(client_fd) == true) {
-
             std::string resp = ":" + conn_client->getNick() + "!" + conn_client->getUser() + " KICK " + tmp_splitted[1] + " " + tmp_splitted[2] + " :" + conn_client->getNick() + "\n";
             this->serverReplyMessage(resp.c_str(), client_fd);
             std::map<int, Client *>::iterator it = this->connected_clients.begin();
@@ -285,7 +284,9 @@ bool    Server::ft_manage_user(const std::string& tmp, int client_fd) {
         return true;
     }
     else {
-        std::string resp = ":SovietServ 464 " + this->connected_clients.at(client_fd)->getNick() + " :Password incorrect or missing!\n";
+        std::cout << "ENTRO" << std::endl;
+        std::string resp = ":SovietServ 464 " + conn_client->getNick() + " :Password incorrect or missing!\n";
+        std::cout << "invio resp " << resp << std::endl;
         this->serverReplyMessage(resp.c_str(), client_fd);
         return false;
     }
@@ -297,7 +298,19 @@ bool    Server::ft_manage_user(const std::string& tmp, int client_fd) {
 void    Server::ft_manage_nick(const std::string& tmp, int client_fd) {
     Client* conn_client = this->connected_clients.at(client_fd);
     if (conn_client->getNick() != "") { /////// QUESTO IF E' UN TENTATIVO DI GESTIRE IL CAMBIO NICK, SEMBRA FUNZIONARE MA NON TROPPO, FORSE ALCUNI DI QUESTE REPLY NON SERVONO...
+        std::string oldNick = conn_client->getNick();
         conn_client->setNickname(tmp.substr(tmp.find(" ") + 1)); 
+        std::map<std::string, Channel *>::iterator it = this->channels.begin();
+        std::string resp = ":" + oldNick + "!" + conn_client->getUser() + " NICK " + conn_client->getNick() + "\n";
+        while (it != this->channels.end()) {
+            if (it->second->isUserInChan(client_fd) == true) {
+                it->second->sendToAllusersExcept(resp, client_fd);
+            }
+            it++;
+        }
+        this->serverReplyMessage(resp.c_str(), client_fd);
+
+
         // std::string resp = ":SovietServer 311 " + conn_client->getNick() + " " + conn_client->getNick() + " Soviet server * " + conn_client->getUser() + "\n"
         // + ":SovietServer 312 " + conn_client->getNick() + " " + conn_client->getNick() + " Soviet server :A very badass server...\n"
         // + ":SovietServer 318 " + conn_client->getNick() + " " + conn_client->getNick() + " :End of WHOIS list\r\n";
