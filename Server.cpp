@@ -233,7 +233,7 @@ void    Server::ft_manage_ping(const std::string& tmp, int client_fd) {
     }
 }
 
-void    Server::ft_manage_mode(const std::string& tmp, int client_fd) {
+/* void    Server::ft_manage_mode(const std::string& tmp, int client_fd) {
     Client* conn_client = this->connected_clients.at(client_fd);
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     if (tmp_splitted.size() == 3 && tmp_splitted[1] == conn_client->getNick()) {
@@ -242,6 +242,35 @@ void    Server::ft_manage_mode(const std::string& tmp, int client_fd) {
             this->serverReplyMessage(resp.c_str(), client_fd);
         }
     }
+} */
+
+void    Server::ft_manage_mode(const std::string& tmp, int client_fd) {
+    Client* conn_client = this->connected_clients.at(client_fd);
+    std::vector<std::string> tmp_splitted = ft_splitString(tmp);
+    std::string first_part = ":" + conn_client->getNick() + "!" + conn_client->getUser() + " MODE " + tmp_splitted[1] + " " + tmp_splitted[2];
+    
+    if (tmp_splitted[2][1] == 'i') {
+        std::string resp = first_part + "\n";
+        this->serverReplyMessage(resp.c_str(), client_fd);
+    }
+   
+    if (tmp_splitted[2][1] == 'o') {
+        std::string resp = first_part + "o " + tmp_splitted[3] + "\n";
+        this->serverReplyMessage(resp.c_str(), client_fd);
+    }
+
+    if (tmp_splitted[2][1] == 't') {
+        std::string resp = first_part + "\n";
+        this->serverReplyMessage(resp.c_str(), client_fd);
+    }
+
+    if (tmp_splitted[2][1] == 'k') {
+        std::string resp = first_part + "\n";
+        this->serverReplyMessage(resp.c_str(), client_fd);
+    }
+    
+    //RISPOSTA SE IL CLIENT NON E' ADMIN
+    //std::string resp = ":SovietServer 482 " + conn_client->getNick() + " " + tmp_splitted[1] + " :You must have channel op access or above to set channel mode k\n";
 }
 
 bool    Server::ft_manage_pass(const std::string& tmp) {
