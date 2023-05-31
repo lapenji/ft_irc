@@ -32,7 +32,7 @@ void Server::setSocket() {
         std::cerr << "Socket listening error, exit..." << std::endl;
         exit(-1);
     }
-    std::cout << "->>\tListening on port " << this->port << std:: endl;
+    std::cout << "\033[1;33m->>\tListening on port " << this->port << "\033[0m" << std:: endl;
 }
 
 void Server::serverReplyMessage(const char* response, int client_fd) {
