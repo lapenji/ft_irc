@@ -35,9 +35,8 @@ std::vector<std::string> ft_splitBuffer(std::string tmp) {
     return buffer_splitted;
 }
 
-void    printMap(std::map<std::string, Channel*> myMap /* std::map<int, Client*> myMap */) { //FUNZIONE PER STAMPARE IL CONTENUTO DEL MAP (PER CONTROLLARLO)
+void    printMap(std::map<std::string, Channel*> myMap ) { //FUNZIONE PER STAMPARE IL CONTENUTO DEL MAP (PER CONTROLLARLO)
     std::cout << "STAMPO IL MAP" << std::endl;
-    //for(std::map<int, Client*>::const_iterator it = myMap.begin();
     for(std::map<std::string, Channel*>::const_iterator it = myMap.begin(); it != myMap.end(); ++it)
     {
         std::cout << it->first << std::endl;

@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int fd, const std::string& hostname, int port) : fd(fd), password(""), hostname(hostname), port(port), printed(false), cap(false) {
+Client::Client(int fd, const std::string& hostname, int port) : fd(fd), password(""), hostname(hostname), port(port), printed(false), cap(false), aut(false) {
 
 }
 
@@ -64,4 +64,12 @@ void    Client::setCap(bool cap) {
 
 int     Client::getFd() {
     return this->fd;
+}
+
+bool    Client::getAut() {
+    return this->aut;
+}
+
+void    Client::setAut(bool aut) {
+    this->aut = aut;
 }

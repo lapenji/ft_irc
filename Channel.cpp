@@ -52,11 +52,11 @@ Channel::Channel(Client * client, std::string name) {
 
 
 void    Channel::addClient(Client* client) {
-    this->clients.insert(std::make_pair(client->getFd(), client));
     std::map<int, Client *>::iterator it = this->clients.begin();
-    if (this->admins.empty() == true) {
+    if (this->admins.empty() == true && this->clients.empty() == true) {
         this->addAdmin(client);
     }
+    this->clients.insert(std::make_pair(client->getFd(), client));
     while (it != this->clients.end()) {
         if (it->first != client->getFd()) {
             std::string resp = ":" + client->getNick() + "!" + client->getUser() + " JOIN :" + this->name  + "\n";
@@ -74,8 +74,7 @@ void    Channel::removeClient(Client* client) {
         sendMessage(resp.c_str(), it->first);
         it++;
     }
-    this->admins.erase(client->getFd());
-    this->clients.erase(client->getFd());
+    removeFromChan(client->getFd());
 }
 
 void    Channel::changeTopic(const std::string& topic, int changer) {
@@ -130,8 +129,14 @@ std::string Channel::getTopic() {
 }
 
 void    Channel::removeFromChan(int user) {
-    this->admins.erase(user);
+    if (this->isUserAdmin(user) == true) {
+
+        this->admins.erase(user);
+    }
     this->clients.erase(user);
+    std::cout << "STAMPO DOPO LEAVE" << std::endl;
+    this->printChanUsers();
+    std::cout << "FINE STAMPA DOPO IL LEAVE" << std::endl;
 }
 
 
@@ -149,5 +154,11 @@ bool    Channel::isUserAdmin(int user) {
     return false;
 }
 
+bool    Channel::isEmpty() {
+    if (this->clients.empty() == true) {
+        return true;
+    }
+    return false;
+}
 
 Channel::~Channel() {}

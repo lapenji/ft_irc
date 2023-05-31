@@ -27,4 +27,5 @@ public:
     void    removeFromChan(int user);
     bool    isUserInChan(int user);
     bool    isUserAdmin(int user);
+    bool    isEmpty();
 };

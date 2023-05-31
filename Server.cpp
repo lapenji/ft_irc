@@ -200,6 +200,9 @@ void    Server::ft_manage_privmsg(const std::string& tmp, int client_fd) {
 void    Server::ft_manage_part(const std::string& tmp, int client_fd) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     this->channels.at(tmp_splitted[1])->removeClient(this->connected_clients.at(client_fd));
+    if (this->channels.at(tmp_splitted[1])->isEmpty() == true) {
+        this->channels.erase(tmp_splitted[1]);
+    }
 }
 
 void    Server::ft_manage_join(const std::string& tmp, int client_fd) {
@@ -267,18 +270,25 @@ void    Server::ft_create_map_user(std::vector<std::string> result, int client_f
         conn_client->setFullName(result[4]);        ///////NON SI SA SE SERVE O NO, PER ME NO
 }
 
-void    Server::ft_manage_user(const std::string& tmp, int client_fd) {
+bool    Server::ft_manage_user(const std::string& tmp, int client_fd) {
     Client* conn_client = this->connected_clients.at(client_fd);
-    if (conn_client->getFull() == "") {
-        std::vector<std::string> result = ft_splitString(tmp);
-        if (result.size() >= 5) {
-            ft_create_map_user(result, client_fd);
-        }
+    std::vector<std::string> result = ft_splitString(tmp);
         //else {
         //    resp = "not enough parameters\r\n"; /////DA RIVEDERE
-        //}
+        //
+    if (conn_client->getAut() == true) {
+        if (result.size() >= 5) {
+        ft_create_map_user(result, client_fd);
     }
-    ft_print_welcome_msg(client_fd);
+        ft_print_welcome_msg(client_fd);
+
+        return true;
+    }
+    else {
+        std::string resp = ":SovietServ 464 " + this->connected_clients.at(client_fd)->getNick() + " :Password incorrect or missing!\n";
+        this->serverReplyMessage(resp.c_str(), client_fd);
+        return false;
+    }
     //else {
     //    resp = "you already register\r\n";  /////DA RIVEDERE
     //}
@@ -296,7 +306,7 @@ void    Server::ft_manage_nick(const std::string& tmp, int client_fd) {
     //if (conn_client->getNick() == "") {   ////    TOLTO IF PERCHE' IL NICK SI PUÒ CAMBIARE SEMPRE
     else if (tmp.length() > 5) {
         conn_client->setNickname(tmp.substr(tmp.find(" ") + 1));
-        std::cout << "\nNick: " << conn_client->getNick() << std::endl;    ////SOLO PER DEBUG
+        // std::cout << "\nNick: " << conn_client->getNick() << std::endl;    ////SOLO PER DEBUG
     }
         //else {
         //    std::cout << "\nnot enough parameters, kicked!" << std::endl;   ////SOLO PER DEBUG
@@ -336,20 +346,21 @@ int Server::handle_client_request(int client_fd) {
             conn_client->setCap(true);
         }
         for (size_t i = 0; i < buffer_splitted.size(); ++i) {
-            // if (buffer_splitted[i].find("PASS ") != std::string::npos) {
-            //     std::cout << "entro!" << std::endl;
-            // }
             if (buffer_splitted[i].find("NICK") == 0) {
                ft_manage_nick(buffer_splitted[i], client_fd);
             }
             else if (buffer_splitted[i].find("USER") == 0 && buffer_splitted[i].find("USERHOST") != 0) {
-               ft_manage_user(buffer_splitted[i], client_fd);
+               if (ft_manage_user(buffer_splitted[i], client_fd) == false)
+                return -1;
             }
             else if (buffer_splitted[i].find("PASS") == 0) {
                 if (ft_manage_pass(buffer_splitted[i]) == false) {
-                    this->serverReplyMessage("Wrong password, disconnected!", client_fd);
-                    return -1;
-                }  
+                    std::string resp;
+                    this->connected_clients.at(client_fd)->setAut(false);
+                }
+                else {
+                    this->connected_clients.at(client_fd)->setAut(true);
+                }
             }
             else if (buffer_splitted[i].find("MODE") == 0) {
                ft_manage_mode(buffer_splitted[i], client_fd);

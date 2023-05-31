@@ -14,6 +14,7 @@ class Client {
     int         port;
     bool printed;
     bool cap;
+    bool aut;
 
     public:
     Client(int fd, const std::string& hostname, int port);
@@ -33,6 +34,8 @@ class Client {
     bool    getPrinted();   ////TEST
     bool    getCap();
     int     getFd();
+    bool    getAut();
+    void    setAut(bool aut);
 };
 
 #endif
