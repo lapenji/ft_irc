@@ -44,7 +44,6 @@ void Server::ft_manage_l(const std::string& first_part, int client_fd, Channel* 
     if (tmp_splitted[2][0] == '+') {
         if (tmp_splitted.size() == 4) {
             if (isStringNumeric(tmp_splitted[3]) == true) {
-                std::cout << "cambio numero di user permessi" << std::endl;
             chan->setUserNrLimited(true);
             chan->setMaxUsers(std::atoi(tmp_splitted[3].c_str()));
             std::string resp = first_part + " " + tmp_splitted[3] + "\n";
@@ -54,6 +53,9 @@ void Server::ft_manage_l(const std::string& first_part, int client_fd, Channel* 
         }
     }
     else if (tmp_splitted[2][0] == '-') {
+        std::string resp = first_part + "\n";
+        this->serverReplyMessage(resp.c_str(), client_fd);
+        chan->sendToAllusersExcept(resp.c_str(), client_fd);
         chan->setUserNrLimited(false);
     }
 }
