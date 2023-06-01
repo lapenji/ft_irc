@@ -166,6 +166,7 @@ void    Server::ft_manage_part(const std::string& tmp/* , int client_fd */, Clie
         chan->removeClient(client, "");
     }
     if (chan->isEmpty() == true) {
+        delete this->channels.at(tmp_splitted[1]);
         this->channels.erase(tmp_splitted[1]);
     }
 }

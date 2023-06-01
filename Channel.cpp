@@ -14,6 +14,20 @@
 #include <strings.h>
 #include "Server.hpp"
 
+Channel::~Channel() {
+    // std::cout << "distruttore in azione" << std::endl;
+    // std::map<int, Client *>::iterator it = this->admins.begin();
+    // while (it != this->admins.end()) {
+    //     delete it->second;
+    //     it++;
+    // }
+    // std::map<int, Client *>::iterator ita = this->clients.begin();
+    // while (ita != this->clients.end()) {
+    //     delete ita->second;
+    //     ita++;
+    // }
+}
+
 void sendMessage(const char* response, int client_fd) {
     if(send(client_fd, response, strlen(response), 0) == -1) {
         std::cerr << "->>\tError sending response to client!" << std::endl;
@@ -52,7 +66,7 @@ void    Channel::printChanUsers() { //FUNZIONE PER STAMPARE IL CONTENUTO DEL MAP
 Channel::Channel(Client * client, std::string name) {
     this->name = name;
     this->clients.insert(std::make_pair(client->getFd(), client));
-    this->topic = ":Welcome to " + name;
+    this->topic = ":Welcome to " + this->name;
     this->freeTopic = false;
     this->needPassword = false;
     this->inviteOnly = false;
@@ -250,4 +264,3 @@ void            Channel::setUserNrLimited(bool arg) {
     this->userNrLimited = arg;
 }
 
-Channel::~Channel() {}
