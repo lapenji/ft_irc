@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include "Client.hpp"
 #include "Channel.hpp"
+#include "Server.hpp"
 
 bool isStringNumeric(const std::string& str);
 std::vector<std::string> ft_splitString(const std::string& str);
