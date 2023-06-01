@@ -64,7 +64,7 @@ private:
     void    ft_manage_t(const std::string& first_part, int client_fd, Channel* chan, char c);
     void    ft_manage_l(const std::string& first_part, int client_fd, Channel* chan, std::vector<std::string> tmp_splitted);
     void    ft_manage_k(const std::string& first_part, int client_fd, Channel* chan, std::vector<std::string> tmp_splitted);
-
+    void    ft_manage_quit(const std::string& tmp, int client_fd);
 public:
     Server(int port, const std::string& password);
     ~Server();

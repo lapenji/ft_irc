@@ -4,3 +4,10 @@ MESSAGGIO LEAVE
 DISCONNESSIONE PASS SBAGLIATA DA RIVEDERE
 MODE - INVITE RISOLTO | PASS SEMBRA RISOLTO
 
+REGOLE NICK A name can only contain the following characters:
+
+A through to Z. (Lowercase and uppercase.)
+0 through to 9.
+`|^_-{}[] and \
+
+:irc.example.com 403 lapenji &palle :Invalid channel name

@@ -155,6 +155,29 @@ void    Server::ft_manage_privmsg(const std::string& tmp, int client_fd, const s
 
 }
 
+void    Server::ft_manage_quit(const std::string& tmp, int client_fd) {
+    std::vector<int> alreadyComunicated;
+    alreadyComunicated.clear();
+    std::vector<std::string> tmp_splitted = ft_splitString(tmp);
+    Client* client = this->connected_clients.at(client_fd);
+    std::map<std::string, Channel *>::iterator it = this->channels.begin();
+    while (it != this->channels.end()) {
+        if (it->second->isUserInChan(client_fd) == true) {
+            it->second->removeFromChan(client_fd);
+            std::string resp = ":" + client->getNick() + "!" + client->getUser() + " QUIT " + ft_joinStr(tmp_splitted, 1) + "\n";
+            std::map<int, Client *>::iterator it2 = it->second->clients.begin();
+            while (it2 != it->second->clients.end()) {
+                if (is_fd_in_vector(it2->first, alreadyComunicated) == false) {
+                        this->serverReplyMessage(resp.c_str(), it2->first);
+                        alreadyComunicated.push_back(it2->first);
+                }
+                it2++;
+            }
+        }
+        it++;
+    }
+}
+
 void    Server::ft_manage_part(const std::string& tmp/* , int client_fd */, Client* client) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     Channel* chan = this->channels.at(tmp_splitted[1]);
@@ -174,6 +197,11 @@ void    Server::ft_manage_part(const std::string& tmp/* , int client_fd */, Clie
 void    Server::ft_manage_join(const std::string& tmp, int client_fd, Client* client, const std::string& nick, const std::string& user) {
 
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
+    if (tmp_splitted.size() < 2) {
+        std::string resp = build_461("JOIN", nick);
+        this->serverReplyMessage(resp.c_str(), client_fd);
+        return;
+    } 
     if (this->channels.find(tmp_splitted[1]) == this->channels.end())  {
         this->channels.insert(std::make_pair(tmp_splitted[1], new Channel(client, tmp_splitted[1])));
         Channel* chan = this->channels.at(tmp_splitted[1]);
@@ -256,8 +284,19 @@ bool    Server::ft_manage_user(const std::string& tmp, int client_fd, Client* cl
 }
 
 void    Server::ft_manage_nick(const std::string& tmp, int client_fd, Client* client) {
+    std::vector<std::string> tmp_splitted = ft_splitString(tmp);
+    if (tmp_splitted.size() < 2) {
+        std::string resp = build_461("NICK", "");
+        this->serverReplyMessage(resp.c_str(), client_fd);
+        return;
+    }
     if (isNickInUse(tmp.substr(tmp.find(" ") + 1)) == true) {
         std::string resp = ":SovietServer 433 " + tmp.substr(tmp.find(" ") + 1) + " :Nickname already in use\n";
+        this->serverReplyMessage(resp.c_str(), client_fd);
+        return;
+    }
+    if (isNickValid(tmp.substr(tmp.find(" ") + 1)) == false) {
+        std::string resp = ":SovietServer 432 " + tmp.substr(tmp.find(" ") + 1) + ":Erroneous Nickname\n";
         this->serverReplyMessage(resp.c_str(), client_fd);
         return;
     }
@@ -345,6 +384,7 @@ int Server::handle_client_request(int client_fd) {
                 ft_manage_kick(buffer_splitted[i], client_fd, nick, user);
             }
             else if (buffer_splitted[i].find("QUIT") == 0) {
+                ft_manage_quit(buffer_splitted[i], client_fd);
                 return -1;
             }
         }

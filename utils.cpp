@@ -124,3 +124,33 @@ void Server::ft_print_welcome_msg(int client_fd, Client* client) {
     this->serverReplyMessage(resp.c_str(), client_fd);
 }
 
+bool    is_fd_in_vector(int fd, std::vector<int> vettore) {
+    std::vector<int>::iterator it = vettore.begin();
+    while (it != vettore.end()) {
+        if (*it == fd) {
+            return true;
+        }
+        it++;
+    }
+    return false;
+}
+
+bool    isNickValid(const std::string& nick) {
+    std::string check = "`|^_-{}[]\\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    std::string checkStart = "`|^_{}[]\\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    int i = 1;
+    if (checkStart.find(nick[0]) == std::string::npos) {
+        return false;
+    }
+    while (nick[i]) {
+        if (check.find(nick[i]) == std::string::npos) {
+            return false;
+        }
+        i++;
+    }
+    return true;
+}
+
+std::string build_461(const std::string& errore, const std::string& nick) {
+    return ":SovietServer 461 " + nick + " " + errore + " :Not enought parameters.\n";
+}
