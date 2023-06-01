@@ -126,7 +126,7 @@ void    Server::ft_manage_privmsg(const std::string& tmp, int client_fd, const s
     if (tmp_splitted[1][0] == '#') {
         if (this->channels.find(tmp_splitted[1]) != this->channels.end()) {
             std::map<int, Client*>::iterator it = chan->clients.begin();
-            chan->printChanUsers();
+            //chan->printChanUsers();
             if (chan->isUserInChan(client_fd) == true) {
                 while (it != chan->clients.end()) {
                     if (it->first != client_fd) {
@@ -201,7 +201,12 @@ void    Server::ft_manage_join(const std::string& tmp, int client_fd, Client* cl
         std::string resp = build_461("JOIN", nick);
         this->serverReplyMessage(resp.c_str(), client_fd);
         return;
-    } 
+    }
+    if (tmp_splitted[1][0] != '#') {
+        std::string resp = ":SovietServer 403 " + client->getNick() + " " + tmp_splitted[1] + " :Invalid channel name\n";
+        this->serverReplyMessage(resp.c_str(), client_fd);
+        return;
+    }
     if (this->channels.find(tmp_splitted[1]) == this->channels.end())  {
         this->channels.insert(std::make_pair(tmp_splitted[1], new Channel(client, tmp_splitted[1])));
         Channel* chan = this->channels.at(tmp_splitted[1]);

@@ -90,7 +90,7 @@ void    Channel::addClient(Client* client) {
         }
         it++;
     }
-    printChanUsers();
+    //printChanUsers();
 }
 
 void    Channel::removeClient(Client* client, const std::string& message) {
@@ -144,7 +144,7 @@ std::string Channel::getUsers() {
             }
             it++;
         }
-    std::cout << "ESCO DAL WHILE" << std::endl;
+    //std::cout << "ESCO DAL WHILE" << std::endl;
     if (res[0] != '\0')
         res.erase(res.end() - 1);
     return res;
