@@ -118,11 +118,11 @@ void    Server::ft_manage_invite(const std::string& tmp, int client_fd, const st
 
 }
 
+
+
 void    Server::ft_manage_privmsg(const std::string& tmp, int client_fd, const std::string& nick) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
-    std::cout << "STAMPO TMP_SPLITTED[2] " << "[" << tmp_splitted[2] << "]" << " size =" << tmp_splitted.size() << std::endl;
-    if (tmp_splitted[2].find(":DCC") != std::string::npos) {
-        std::cout << "ENTRO" << std::endl;
+    if ((int)tmp_splitted[2][0] == 58 && tmp_splitted[2].find("DCC") == 2) {
         std::cout << "FILE TRANSFER" << std::endl;
         return;
     }
@@ -158,7 +158,7 @@ void    Server::ft_manage_privmsg(const std::string& tmp, int client_fd, const s
             this->serverReplyMessage(resp.c_str(), client_fd);
         }
         else {
-            std::string resp = ":" + nick + "!" + this->connected_clients.at(client_fd)->getUser() + " PRIVMSG " + tmp_splitted[1] + " " + tmp_splitted[2] + "\n";
+            std::string resp = ":" + nick + "!" + this->connected_clients.at(client_fd)->getUser() + " PRIVMSG " + tmp_splitted[1] + " " + ft_joinStr(tmp_splitted, 2) + "\n";
             this->serverReplyMessage(resp.c_str(), this->find_client(tmp_splitted[1]));
         }
     }

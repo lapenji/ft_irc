@@ -11,3 +11,7 @@ A through to Z. (Lowercase and uppercase.)
 `|^_-{}[] and \
 
 :irc.example.com 403 lapenji &palle :Invalid channel name
+
+PRIVMSG ltombell :DCC SEND icon-cache.kcache 2130706433 1026 10547304
+PRIVMSG ltombell DCC SEND ACCEPT icon-cache.kcache 2130706433 1026 10547304
+:DCC ACCEPT recently-used.xbel 168559622 1026 3517
