@@ -120,10 +120,20 @@ void    Server::ft_manage_invite(const std::string& tmp, int client_fd, const st
 
 void    Server::ft_manage_privmsg(const std::string& tmp, int client_fd, const std::string& nick) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
-    Channel* chan = this->channels.at(tmp_splitted[1]);
-    //std::string nick = this->connected_clients.at(client_fd)->getNick();
+    std::cout << "STAMPO TMP_SPLITTED[2] " << "[" << tmp_splitted[2] << "]" << " size =" << tmp_splitted.size() << std::endl;
+    if (tmp_splitted[2].find(":DCC") != std::string::npos) {
+        std::cout << "ENTRO" << std::endl;
+        std::cout << "FILE TRANSFER" << std::endl;
+        return;
+    }
     std::string msg = ft_joinStr(tmp_splitted, 2);
     if (tmp_splitted[1][0] == '#') {
+        if (this->channels.find(tmp_splitted[1]) == this->channels.end()) {
+            std::string resp = ":SovietServ 401 " + nick + " " + tmp_splitted[1] + " :No such nick/channel\n";
+            this->serverReplyMessage(resp.c_str(), client_fd);
+            return;
+        }
+        Channel* chan = this->channels.at(tmp_splitted[1]);
         if (this->channels.find(tmp_splitted[1]) != this->channels.end()) {
             std::map<int, Client*>::iterator it = chan->clients.begin();
             //chan->printChanUsers();
@@ -248,6 +258,11 @@ void    Server::ft_manage_join(const std::string& tmp, int client_fd, Client* cl
 void    Server::ft_manage_ping(const std::string& tmp, int client_fd) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     if (tmp_splitted.size() == 2) {
+        if (tmp_splitted[1].find("LAG") != std::string::npos) {
+            std::string resp = ":SovietServer PONG SovietServer " + tmp_splitted[1] + "\n";
+            this->serverReplyMessage(resp.c_str(), client_fd);
+            return;
+        }
         this->serverReplyMessage(":SovietServer PONG SovietServer :SovietServer\r\n", client_fd);
     }
 }
@@ -408,7 +423,7 @@ void Server::startServer() {
     while(true) {
         signal(SIGINT, ft_signal_ctrl_c);
         if (poll(this->poll_vec.data(), this->poll_vec.size(), -1) == -1) {
-            std::cerr << "Poll error, exit..." << std::endl;
+            // std::cerr << "Poll error, exit..." << std::endl;
             return;
         }
         if (this->poll_vec[0].revents & POLLIN) {

@@ -90,7 +90,6 @@ void    Channel::addClient(Client* client) {
         }
         it++;
     }
-    //printChanUsers();
 }
 
 void    Channel::removeClient(Client* client, const std::string& message) {
@@ -144,7 +143,6 @@ std::string Channel::getUsers() {
             }
             it++;
         }
-    //std::cout << "ESCO DAL WHILE" << std::endl;
     if (res[0] != '\0')
         res.erase(res.end() - 1);
     return res;
@@ -160,9 +158,6 @@ void    Channel::removeFromChan(int user) {
         this->admins.erase(user);
     }
     this->clients.erase(user);
-    /* std::cout << "STAMPO DOPO LEAVE" << std::endl;
-    this->printChanUsers();
-    std::cout << "FINE STAMPA DOPO IL LEAVE" << std::endl; */
 }
 
 

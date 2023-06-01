@@ -120,7 +120,9 @@ void Server::ft_print_welcome_msg(int client_fd, Client* client) {
     if (pos != std::string::npos) {
         extract_name_from_user = client->getFull().substr(pos + 1);
     }
-    std::string resp = " Welcome to the Soviet Network!\n";
+    std::string resp2 = ":SovietServer NOTICE Auth :Welcome to SovietServer!\r\n";
+    this->serverReplyMessage(resp2.c_str(), client_fd);
+    std::string resp = ":SovietServer 001 " + client->getNick() + " :Welcome to the Soviet Network " + client->getNick() + "! \n";
     this->serverReplyMessage(resp.c_str(), client_fd);
 }
 
