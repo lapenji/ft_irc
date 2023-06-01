@@ -80,8 +80,6 @@ void Server::ft_manage_k(const std::string& first_part, int client_fd, Channel* 
 
 void    Server::ft_manage_mode(const std::string& tmp, int client_fd, const std::string& nick, const std::string& user) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
-    //std::string nick = this->connected_clients.at(client_fd)->getNick();
-    //std::string user = this->connected_clients.at(client_fd)->getUser();
     Channel* chan = this->channels.at(tmp_splitted[1]);
     if (tmp_splitted.size() == 3 && tmp_splitted[2][1] == 'b') {
         return;

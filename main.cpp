@@ -1,5 +1,12 @@
 #include "Server.hpp"
 
+bool run = true;
+
+void    ft_signal_ctrl_c(int sig) {
+    (void)sig;
+    std::cout << "ESCO!" << std::endl;
+}
+
 int main (int argc, char **argv) {
     
     if (argc != 3) {

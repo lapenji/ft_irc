@@ -18,7 +18,7 @@ class Client {
     bool    nickOk;
 
     public:
-    Client(int fd, const std::string& hostname, int port);
+    Client(int fd, int port);
     ~Client();
     void    setPassword(const std::string& password);
     void    setNickname(const std::string& nick);

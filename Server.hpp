@@ -1,21 +1,23 @@
 #ifndef SERVER_HPP
-#define SERVER_HPP
-#include <iostream>
-#include <cstdlib>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <cctype>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <sys/poll.h>
-#include <string.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <strings.h>
-//#include "Channel.hpp"
+# define SERVER_HPP
+# include <iostream>
+# include <cstdlib>
+# include <vector>
+# include <map>
+# include <sstream>
+# include <cctype>
+# include <sys/socket.h>
+# include <netinet/in.h>
+# include <sys/poll.h>
+# include <string.h>
+# include <unistd.h>
+# include <netdb.h>
+# include <strings.h>
 #include "Client.hpp"
 #include "utils.hpp"
+
+
+extern bool run;
 
 class Server {
 private:

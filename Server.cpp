@@ -7,6 +7,18 @@ Server::Server(int port, const std::string& password): opt(1), port(port), passw
 
 Server::~Server() {
     std::cout << "distruttore in azione" << std::endl;
+    std::map<int, Client *>::iterator it = this->connected_clients.begin();
+    while (it != this->connected_clients.end()) {
+        delete it->second;
+        close (it->first);
+        it++;
+    }
+    std::map<std::string, Channel *>::iterator ita = this->channels.begin();
+    while (ita != this->channels.end()) {
+        delete ita->second;
+        ita++;
+    }
+    
 }
 
 void Server::setSocket() {
@@ -159,16 +171,12 @@ void    Server::ft_manage_part(const std::string& tmp/* , int client_fd */, Clie
 }
 
 void    Server::ft_manage_join(const std::string& tmp, int client_fd, Client* client, const std::string& nick, const std::string& user) {
-    /* Client* client = this->connected_clients.at(client_fd); 
-    std::string nick = this->connected_clients.at(client_fd)->getNick();
-    std::string user = this->connected_clients.at(client_fd)->getUser(); */
+
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
-    std::string nickOp = " :";
     if (this->channels.find(tmp_splitted[1]) == this->channels.end())  {
         this->channels.insert(std::make_pair(tmp_splitted[1], new Channel(client, tmp_splitted[1])));
         Channel* chan = this->channels.at(tmp_splitted[1]);
         chan->addAdmin(client);
-        nickOp = " :@";
     }
     Channel* chan = this->channels.at(tmp_splitted[1]);
     if (chan->getInviteOnly() == true && chan->isInvited(nick) == false) {
@@ -176,7 +184,6 @@ void    Server::ft_manage_join(const std::string& tmp, int client_fd, Client* cl
         this->serverReplyMessage(resp.c_str(), client_fd);
         return;
     }
-    std::cout << "user limit ed = " << chan->clients.size() << " " << chan->getMaxUsers() << std::endl;
     if (chan->getUserNrLimited() == true && (int)chan->clients.size() >= chan->getMaxUsers()) {
         std::string resp = ":SovietServ 471 " + nick + " " + tmp_splitted[1] + " :Cannot join channel (Channel is full)\n";
         this->serverReplyMessage(resp.c_str(), client_fd);
@@ -248,7 +255,6 @@ bool    Server::ft_manage_user(const std::string& tmp, int client_fd, Client* cl
 }
 
 void    Server::ft_manage_nick(const std::string& tmp, int client_fd, Client* client) {
-    //Client* client = this->connected_clients.at(client_fd);
     if (isNickInUse(tmp.substr(tmp.find(" ") + 1)) == true) {
         std::string resp = ":SovietServer 433 " + tmp.substr(tmp.find(" ") + 1) + " :Nickname already in use\n";
         this->serverReplyMessage(resp.c_str(), client_fd);
@@ -354,9 +360,10 @@ void Server::startServer() {
     pollfd new_pollfd = {socket_fd, POLLIN, 0};
     this->poll_vec.push_back(new_pollfd);
     while(true) {
+        signal(SIGINT, ft_signal_ctrl_c);
         if (poll(this->poll_vec.data(), this->poll_vec.size(), -1) == -1) {
             std::cerr << "Poll error, exit..." << std::endl;
-            exit (-1);
+            return;
         }
         if (this->poll_vec[0].revents & POLLIN) {
             sockaddr_in client_address = {};
@@ -371,7 +378,7 @@ void Server::startServer() {
                 this->poll_vec.push_back(new_pollfd);
                 char hostname[NI_MAXHOST];
                 getnameinfo((struct sockaddr *) &s_address, sizeof(s_address), hostname, NI_MAXHOST, NULL, 0, NI_NUMERICSERV);
-                Client* tmp = new Client(new_pollfd.fd, hostname, ntohs(s_address.sin_port));
+                Client* tmp = new Client(new_pollfd.fd, ntohs(s_address.sin_port));
                 this->connected_clients.insert(std::make_pair(client_fd, tmp));
                 std::cout << "->>\tsocket:" << new_pollfd.fd << std::endl;
                 //printMap(connected_clients);
