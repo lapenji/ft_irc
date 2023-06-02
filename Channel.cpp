@@ -126,32 +126,6 @@ bool     Channel::checkIfAdmin(int user) {
     return true;
 }
 
-std::string Channel::getUsers() {
-    std::string res = "";
-    std::map<int, Client*>::const_iterator ita = this->admins.begin();
-    while (ita != this->admins.end()) {
-        res += "@";
-        res += ita->second->getNick();
-        res += " ";
-        ita++;
-    }
-    std::map<int, Client*>::const_iterator it = this->clients.begin();
-        while (it != this->clients.end()) {
-            if (this->admins.find(it->first) == this->admins.end()) {
-                res += it->second->getNick();
-                res += " ";
-            }
-            it++;
-        }
-    if (res[0] != '\0')
-        res.erase(res.end() - 1);
-    return res;
-}
-
-std::string Channel::getTopic() {
-    return this->topic;
-}
-
 void    Channel::removeFromChan(int user) {
     if (this->isUserAdmin(user) == true) {
 
@@ -181,6 +155,33 @@ bool    Channel::isEmpty() {
     return false;
 }
 
+
+std::string Channel::getUsers() {
+    std::string res = "";
+    std::map<int, Client*>::const_iterator ita = this->admins.begin();
+    while (ita != this->admins.end()) {
+        res += "@";
+        res += ita->second->getNick();
+        res += " ";
+        ita++;
+    }
+    std::map<int, Client*>::const_iterator it = this->clients.begin();
+        while (it != this->clients.end()) {
+            if (this->admins.find(it->first) == this->admins.end()) {
+                res += it->second->getNick();
+                res += " ";
+            }
+            it++;
+        }
+    if (res[0] != '\0')
+        res.erase(res.end() - 1);
+    return res;
+}
+
+std::string Channel::getTopic() {
+    return this->topic;
+}
+
 bool    Channel::getFreeTopic() {
     return this->freeTopic;
 }
@@ -189,8 +190,31 @@ bool    Channel::getInviteOnly() {
     return this->inviteOnly;
 }
 
+std::string&    Channel::getPassword() {
+    return this->password;
+}
+
 bool    Channel::getNeedPassword() {
     return this->needPassword;
+}
+
+int Channel::getMaxUsers() {
+    return this->maxUsers;
+}
+
+bool    Channel::getUserNrLimited() {
+    return this->userNrLimited;
+}
+
+void    Channel::setPassword(const std::string& password) {
+    this->password = password;
+}
+
+void    Channel::setMaxUsers(int nr) {
+    this->maxUsers = nr;
+}
+void    Channel::setUserNrLimited(bool arg) {
+    this->userNrLimited = arg;
 }
 
 void    Channel::setFreeTopic(bool arg) {
@@ -237,30 +261,6 @@ bool    Channel::isInvited(const std::string& nick) {
     return false;
 }
 
-void    Channel::setPassword(const std::string& password) {
-    this->password = password;
-}
-
-std::string&    Channel::getPassword() {
-    return this->password;
-}
-
 void    Channel::removeFromAdmin(int client) {
     this->admins.erase(client);
 }
-
-int             Channel::getMaxUsers() {
-    return this->maxUsers;
-}
-
-bool            Channel::getUserNrLimited() {
-    return this->userNrLimited;
-}
-
-void            Channel::setMaxUsers(int nr) {
-    this->maxUsers = nr;
-}
-void            Channel::setUserNrLimited(bool arg) {
-    this->userNrLimited = arg;
-}
-
