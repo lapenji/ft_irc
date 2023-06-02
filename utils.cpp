@@ -151,6 +151,7 @@ std::string	Server::ft_resp_at(const std::string arg, int client_fd) {
     std::string user = this->connected_clients.at(client_fd)->getUser();
 	std::string ip = this->connected_clients.at(client_fd)->getIp();
 	std::string resp = ":" + nick + "!" + user + "@" + ip + arg + "\n";
+    return resp;
 }
 
 void    Server::ft_reply(const std::string& num, const std::string& arg, int client_fd) {

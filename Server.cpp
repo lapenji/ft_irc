@@ -54,8 +54,6 @@ void    Server::ft_manage_topic(const std::string& tmp, int client_fd) {
     chan->changeTopic(msg, client_fd);
 }
 
-
-
 void    Server::ft_manage_kick(const std::string& tmp, int client_fd) { 
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     if (this->channels.find(tmp_splitted[1]) != this->channels.end()) {
@@ -81,11 +79,6 @@ void    Server::ft_manage_kick(const std::string& tmp, int client_fd) {
         ft_reply("401 ", (tmp_splitted[1] + " :No such channel!\n"), client_fd);
     }
 }
-
-
-
-
-
 
 void    Server::ft_manage_invite(const std::string& tmp, int client_fd) {
     bool success = false;
@@ -159,7 +152,6 @@ void    Server::ft_manage_quit(const std::string& tmp, int client_fd) {
     std::vector<int> alreadyComunicated;
     alreadyComunicated.clear();
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
-    Client* client = this->connected_clients.at(client_fd);
     std::map<std::string, Channel *>::iterator it = this->channels.begin();
     while (it != this->channels.end()) {
         if (it->second->isUserInChan(client_fd) == true) {
@@ -191,18 +183,6 @@ void    Server::ft_manage_part(const std::string& tmp, Client* client) {
         delete this->channels.at(tmp_splitted[1]);
         this->channels.erase(tmp_splitted[1]);
     }
-}
-
-void    Server::ft_print_topic(Channel* chan, const std::string& channel, int client_fd) {
-    std::string ip = this->connected_clients.at(client_fd)->getIp();
-    std::string nick = this->connected_clients.at(client_fd)->getNick();
-    std::string user = this->connected_clients.at(client_fd)->getUser();
-    std::string resp = ":" + nick + "!" + user + "@" + ip + " JOIN " + channel + "\n"
-        + ":SovietServer 332 " + nick + " " + channel +  " " + chan->getTopic() + "\n"
-        + ":SovietServer 353 " + user + " = " + channel + " :" + chan->getUsers() + "\n"
-        + ":SovietServer 366 " + user + " " + channel + " :End of /NAMES list\n";
-    this->serverReplyMessage(resp.c_str(), client_fd);
-
 }
 
 void    Server::ft_manage_join(const std::string& tmp, int client_fd, Client* client) {
@@ -364,7 +344,7 @@ int Server::handle_client_request(int client_fd) {
                 }
             }
             else if (buffer_splitted[i].find("MODE") == 0) {
-               ft_manage_mode(buffer_splitted[i], client_fd, nick);
+               ft_manage_mode(buffer_splitted[i], client_fd);
             }
             else if (buffer_splitted[i].find("PING") == 0) {
                 ft_manage_ping(buffer_splitted[i], client_fd);
