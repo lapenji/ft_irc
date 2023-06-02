@@ -1,82 +1,101 @@
 #include "Client.hpp"
 
-Client::Client(int fd, int port) : fd(fd), password(""), port(port), printed(false), cap(false), aut(false), nickOk (false) {
-
+Client::Client(int fd, int port) : fd(fd), password(""), port(port), printed(false), cap(false), aut(false), nickOk(false)
+{
 }
 
 Client::~Client() {}
 
-void    Client::setPassword(const std::string& password) {
+void Client::setPassword(const std::string &password)
+{
     this->password = password;
 }
 
-void    Client::setNickname(const std::string& nick) {
+void Client::setNickname(const std::string &nick)
+{
     this->nickname = nick;
 }
 
-void    Client::setFullName(const std::string& full) {
+void Client::setFullName(const std::string &full)
+{
     this->fullName = full;
 }
 
-const std::string&  Client::getNick() {
+const std::string &Client::getNick()
+{
     return this->nickname;
 }
 
-const std::string&  Client::getFull() {
+const std::string &Client::getFull()
+{
     return this->fullName;
 }
 
-const std::string&  Client::getUser() {
+const std::string &Client::getUser()
+{
     return this->username;
 }
 
-const std::string&  Client::getPass() {
+const std::string &Client::getPass()
+{
     return this->password;
 }
 
-bool    Client::getPrinted() {
+bool Client::getPrinted()
+{
     return this->printed;
 }
 
-bool    Client::getCap() {
+bool Client::getCap()
+{
     return this->cap;
 }
 
-void    Client::setUserName(const std::string& user) {
+void Client::setUserName(const std::string &user)
+{
     this->username = user;
 }
 
-void    Client::setHostname(const std::string& host) {
+void Client::setHostname(const std::string &host)
+{
     this->hostname = host;
 }
 
-void    Client::setServerName(const std::string& servername) {
+void Client::setServerName(const std::string &servername)
+{
     this->serverName = servername;
 }
 
-void    Client::setPrinted(bool printed) {
+void Client::setPrinted(bool printed)
+{
     this->printed = printed;
 }
 
-void    Client::setCap(bool cap) {
+void Client::setCap(bool cap)
+{
     this->cap = cap;
 }
 
-int     Client::getFd() {
+int Client::getFd()
+{
     return this->fd;
 }
 
-bool    Client::getAut() {
+bool Client::getAut()
+{
     return this->aut;
 }
 
-void    Client::setAut(bool aut) {
+void Client::setAut(bool aut)
+{
     this->aut = aut;
 }
 
-void    Client::setIp(char ipAddress[INET_ADDRSTRLEN]) {
+void Client::setIp(char ipAddress[INET_ADDRSTRLEN])
+{
     this->ip = ipAddress;
 }
-const std::string& Client::getIp() {
+const std::string &Client::getIp()
+{
     return this->ip;
 }
