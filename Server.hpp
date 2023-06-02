@@ -61,6 +61,8 @@ private:
     void ft_print_topic(Channel *chan, const std::string &channel, int client_fd);
     void ft_manage_quit(const std::string &tmp, int client_fd);
     void ft_manage_who(const std::string &tmp, int client_fd, const std::string &nick);
+    void ft_manage_userhost(const std::string &tmp, int client_fd, Client *client);
+    void ft_manage_b(const std::string chan, int client_fd);
 
 public:
     Server(int port, const std::string &password);

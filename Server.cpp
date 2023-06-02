@@ -336,6 +336,19 @@ bool Server::ft_manage_pass(const std::string &tmp)
     return false;
 }
 
+void Server::ft_manage_userhost(const std::string &tmp, int client_fd, Client *client)
+{
+    std::string resp = ":SovietServer 302 " + client->getNick() + " :";
+    if (this->connected_clients.find(this->find_client(tmp.substr(tmp.find(" ") + 1))) != this->connected_clients.end())
+    {
+        Client *client = this->connected_clients.at(this->find_client(tmp.substr(tmp.find(" ") + 1)));
+        resp += client->getNick() + "=+" + client->getUser() + "@" + client->getIp();
+        //: 84c93a935673.example.com 302 ciccio :ciccio=+1@172.17.0.1
+    }
+    resp += "\n";
+    this->serverReplyMessage(resp.c_str(), client_fd);
+}
+
 bool Server::ft_manage_user(const std::string &tmp, int client_fd, Client *client)
 {
     std::vector<std::string> result = ft_splitString(tmp);
@@ -377,7 +390,7 @@ void Server::ft_manage_nick(const std::string &tmp, int client_fd, Client *clien
     }
     if (isNickValid(tmp.substr(tmp.find(" ") + 1)) == false)
     {
-        std::string resp = ":SovietServer 432 " + tmp.substr(tmp.find(" ") + 1) + ":Erroneous Nickname\n";
+        std::string resp = ":SovietServer 432 " + tmp.substr(tmp.find(" ") + 1) + " :Erroneous Nickname\n";
         this->serverReplyMessage(resp.c_str(), client_fd);
         return;
     }
@@ -441,6 +454,10 @@ int Server::handle_client_request(int client_fd)
             {
                 if (ft_manage_user(buffer_splitted[i], client_fd, client) == false)
                     return -1;
+            }
+            else if (buffer_splitted[i].find("USERHOST") == 0)
+            {
+                ft_manage_userhost(buffer_splitted[i], client_fd, client);
             }
             else if (buffer_splitted[i].find("PASS") == 0)
             {
