@@ -85,7 +85,7 @@ void    Channel::addClient(Client* client) {
     this->clients.insert(std::make_pair(client->getFd(), client));
     while (it != this->clients.end()) {
         if (it->first != client->getFd()) {
-            std::string resp = ":" + client->getNick() + "!" + client->getUser() + " JOIN :" + this->name  + "\n";
+            std::string resp = ":" + client->getNick() + "!" + client->getUser() + "@" + client->getIp() + " JOIN :" + this->name  + "\n";
             sendMessage(resp.c_str(), it->first);
         }
         it++;
@@ -95,7 +95,7 @@ void    Channel::addClient(Client* client) {
 void    Channel::removeClient(Client* client, const std::string& message) {
     std::map<int, Client *>::iterator it = this->clients.begin();
     while (it != this->clients.end()) {
-        std::string resp = ":" + client->getNick() + "!" + client->getUser() + " PART " + this->name + " " + message + "\n";
+        std::string resp = ":" + client->getNick() + "!" + client->getUser() + "@" + client->getIp() + " PART " + this->name + " " + message + "\n";
         sendMessage(resp.c_str(), it->first);
         it++;
     }
@@ -110,7 +110,7 @@ void    Channel::changeTopic(const std::string& topic, int changer) {
         sendMessage(resp.c_str(), changer);  
     }
     else {
-        resp = ":" + conn_client->getNick() + "!" + conn_client->getUser() + " TOPIC " + this->name + " " + topic + "\n";
+        resp = ":" + conn_client->getNick() + "!" + conn_client->getUser() + "@" + conn_client->getIp() + " TOPIC " + this->name + " " + topic + "\n";
         std::map<int, Client *>::iterator it = this->clients.begin();
         this->topic = topic;
         while (it != this->clients.end()) {
@@ -160,7 +160,6 @@ void    Channel::removeFromChan(int user) {
     this->clients.erase(user);
 }
 
-
 bool    Channel::isUserInChan(int user) {
     if (this->clients.find(user) != this->clients.end()) {
         return true;
@@ -185,18 +184,23 @@ bool    Channel::isEmpty() {
 bool    Channel::getFreeTopic() {
     return this->freeTopic;
 }
+
 bool    Channel::getInviteOnly() {
     return this->inviteOnly;
 }
+
 bool    Channel::getNeedPassword() {
     return this->needPassword;
 }
+
 void    Channel::setFreeTopic(bool arg) {
     this->freeTopic = arg;
 }
+
 void    Channel::setInviteOnly(bool arg) {
     this->inviteOnly = arg;
 }
+
 void    Channel::setNeedPassword(bool arg, const std::string& password) {
     if (arg == true) {
         this->needPassword = true;
@@ -221,6 +225,7 @@ void    Channel::removeToInvited(const std::string& nick) {
         it++;
     }
 }
+
 bool    Channel::isInvited(const std::string& nick) {
     std::vector<std::string>::iterator it = this->invited.begin();
     while (it != this->invited.end()) {

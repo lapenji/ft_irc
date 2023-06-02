@@ -15,6 +15,7 @@ private:
     std::vector<std::string>    invited;
     int                         maxUsers;
     bool                        userNrLimited;
+    
 public:
     std::map<int, Client *> clients; //DA RIMETTERE PRIVATO
     Channel(Client * client, std::string name);

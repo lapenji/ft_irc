@@ -10,11 +10,11 @@ void    Client::setPassword(const std::string& password) {
     this->password = password;
 }
 
-void                Client::setNickname(const std::string& nick) {
+void    Client::setNickname(const std::string& nick) {
     this->nickname = nick;
 }
 
-void                Client::setFullName(const std::string& full) {
+void    Client::setFullName(const std::string& full) {
     this->fullName = full;
 }
 

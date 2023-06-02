@@ -14,15 +14,15 @@ void Server::ft_manage_i(const std::string& first_part, int client_fd, Channel* 
 void Server::ft_manage_o(const std::string& first_part, int client_fd, Channel* chan, std::vector<std::string> tmp_splitted) {
     std::string resp = first_part + " " + tmp_splitted[3] + "\n";
     if (tmp_splitted[2][0] == '-') {
-        if (this->channels.at(tmp_splitted[1])->isUserAdmin(find_client(tmp_splitted[3])) == true) {
-            this->channels.at(tmp_splitted[1])->removeFromAdmin(find_client(tmp_splitted[3]));
+        if (chan->isUserAdmin(find_client(tmp_splitted[3])) == true) {
+            chan->removeFromAdmin(find_client(tmp_splitted[3]));
             this->serverReplyMessage(resp.c_str(), client_fd);
             chan->sendToAllusersExcept(resp.c_str(), client_fd);
         }
     }
     else if (tmp_splitted[2][0] == '+') {
-        if (this->channels.at(tmp_splitted[1])->isUserAdmin(find_client(tmp_splitted[3])) == false) {
-            this->channels.at(tmp_splitted[1])->addAdmin(this->connected_clients.at(find_client(tmp_splitted[3])));
+        if (chan->isUserAdmin(find_client(tmp_splitted[3])) == false) {
+            chan->addAdmin(this->connected_clients.at(find_client(tmp_splitted[3])));
             this->serverReplyMessage(resp.c_str(), client_fd);
             chan->sendToAllusersExcept(resp.c_str(), client_fd);
         }
@@ -78,7 +78,7 @@ void Server::ft_manage_k(const std::string& first_part, int client_fd, Channel* 
     }
 }
 
-void    Server::ft_manage_mode(const std::string& tmp, int client_fd, const std::string& nick, const std::string& user) {
+void    Server::ft_manage_mode(const std::string& tmp, int client_fd, const std::string& nick, const std::string& user, const std::string& ip) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     if (this->channels.find(tmp_splitted[1]) != this->channels.end()) {
         Channel* chan = this->channels.at(tmp_splitted[1]);
@@ -86,7 +86,7 @@ void    Server::ft_manage_mode(const std::string& tmp, int client_fd, const std:
             return;
         }
         if (chan->isUserAdmin(client_fd) && tmp_splitted.size() > 2) {
-            std::string first_part = ":" + nick + "!" + user + " MODE " + tmp_splitted[1] + " " + tmp_splitted[2];
+            std::string first_part = ":" + nick + "!" + user + "@" + ip + " MODE " + tmp_splitted[1] + " " + tmp_splitted[2];
             if (tmp_splitted.size() > 2) {
                 if (tmp_splitted[2][1] == 'i') {
                     ft_manage_i(first_part, client_fd, chan, tmp_splitted[2][0]);

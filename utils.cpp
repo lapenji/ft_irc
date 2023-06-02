@@ -27,11 +27,6 @@ std::vector<std::string> ft_splitBuffer(std::string tmp) {
         tmp = tmp.substr(pos + 1);
         pos = tmp.find("\n");
     }
-    // Stampa le stringhe separate
-   /*  std::cout << "STAMPO" << std::endl;
-    for (size_t i = 0; i < buffer_splitted.size(); ++i) {
-    std::cout << buffer_splitted[i] << std::endl;
-    } */
     return buffer_splitted;
 }
 
@@ -39,7 +34,6 @@ std::string ft_joinStr(std::vector<std::string> result, int i) {
     std::string tmp = "";
     std::vector<std::string>::iterator it = result.begin() + i;
         while (it != result.end()) {
-            //std::cout << "entro e stampo " << *it << std::endl;
             tmp += *it;
             if (it + 1 != result.end()) {
                 tmp += " ";
@@ -60,23 +54,12 @@ void    printMap(std::map<std::string, Channel*> myMap ) { //FUNZIONE PER STAMPA
 int Server::find_client(const std::string& name) {
     std::map<int, Client *>::iterator it = this->connected_clients.begin();
     while (it != this->connected_clients.end()) {
-            if (it->second->getNick() == name) {
-                return it->first;
-            }
-            it++;
-    }
-    return -1;
-}
-
-bool    Server::isNickInUse(const std::string &nick) {
-    std::map<int, Client *>::iterator it = this->connected_clients.begin();
-    while (it != this->connected_clients.end()) {
-        if (it->second->getNick() == nick) {
-            return true;
+        if (it->second->getNick() == name) {
+            return it->first;
         }
         it++;
     }
-    return false;
+    return -1;
 }
 
 void Server::ft_delete_client(int client_fd) {
@@ -90,6 +73,17 @@ void Server::ft_delete_client(int client_fd) {
         map_it++;
     }
     std::cout << "\033[1;32m-->> QUITTATO IL CLIENT\033[0m" << std::endl;
+}
+
+bool    Server::isNickInUse(const std::string &nick) {
+    std::map<int, Client *>::iterator it = this->connected_clients.begin();
+    while (it != this->connected_clients.end()) {
+        if (it->second->getNick() == nick) {
+            return true;
+        }
+        it++;
+    }
+    return false;
 }
 
 void    Server::ft_create_map_user(std::vector<std::string> result, int client_fd) {
@@ -113,7 +107,6 @@ void Server::serverReplyMessage(const char* response, int client_fd) {
 }
 
 void Server::ft_print_welcome_msg(int client_fd, Client* client) {
-    //Client* client = this->connected_clients.at(client_fd);
     std::string extract_name_from_user;
     size_t pos = client->getFull().find(":");
     client->setPrinted(true);
@@ -126,9 +119,9 @@ void Server::ft_print_welcome_msg(int client_fd, Client* client) {
     this->serverReplyMessage(resp.c_str(), client_fd);
 }
 
-bool    is_fd_in_vector(int fd, std::vector<int> vettore) {
-    std::vector<int>::iterator it = vettore.begin();
-    while (it != vettore.end()) {
+bool    is_fd_in_vector(int fd, std::vector<int> vector) {
+    std::vector<int>::iterator it = vector.begin();
+    while (it != vector.end()) {
         if (*it == fd) {
             return true;
         }
@@ -153,6 +146,6 @@ bool    isNickValid(const std::string& nick) {
     return true;
 }
 
-std::string build_461(const std::string& errore, const std::string& nick) {
-    return ":SovietServer 461 " + nick + " " + errore + " :Not enought parameters.\n";
+std::string build_461(const std::string& error, const std::string& nick) {
+    return ":SovietServer 461 " + nick + " " + error + " :Not enought parameters.\n";
 }
