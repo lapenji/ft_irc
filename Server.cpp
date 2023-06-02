@@ -445,7 +445,9 @@ void Server::startServer() {
                 this->poll_vec.push_back(new_pollfd);
                 char hostname[NI_MAXHOST];
                 getnameinfo((struct sockaddr *) &s_address, sizeof(s_address), hostname, NI_MAXHOST, NULL, 0, NI_NUMERICSERV);
-                Client* tmp = new Client(new_pollfd.fd, ntohs(s_address.sin_port));
+                Client* tmp = new Client(new_pollfd.fd, ntohs(s_address.sin_port));///////aggiunto per settare ip, sarebbe meglio nel costruttore
+				tmp->setIp(ipAddress);
+				std::cout << "ip = " << tmp->getIp() << std::endl;
                 this->connected_clients.insert(std::make_pair(client_fd, tmp));
                 std::cout << "->>\tsocket:" << new_pollfd.fd << std::endl;
                 //printMap(connected_clients);

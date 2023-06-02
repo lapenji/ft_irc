@@ -2,6 +2,8 @@
 # define CLIENT_HPP
 # include <iostream>
 
+#include <arpa/inet.h>
+
 class Client {
     private:
     int         fd;
@@ -16,6 +18,8 @@ class Client {
     bool    cap;
     bool    aut;
     bool    nickOk;
+
+    std::string ip;
 
     public:
     Client(int fd, int port);
@@ -37,6 +41,8 @@ class Client {
     int     getFd();
     bool    getAut();
     void    setAut(bool aut);
+    void    setIp(char ipAddress[INET_ADDRSTRLEN]);
+    const std::string& getIp();
 };
 
 #endif

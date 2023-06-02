@@ -73,3 +73,10 @@ bool    Client::getAut() {
 void    Client::setAut(bool aut) {
     this->aut = aut;
 }
+
+void    Client::setIp(char ipAddress[INET_ADDRSTRLEN]) {
+    this->ip = ipAddress;
+}
+const std::string& Client::getIp() {
+    return this->ip;
+}
