@@ -435,7 +435,13 @@ void Server::startServer() {
             }
             else {
                 std::cout << "->>\tNew connection accepted" << std::endl;
-                pollfd new_pollfd = {client_fd, POLLIN, 0};
+                ///////////STAMPA IP DEL CLIENT
+				char ipAddress[INET_ADDRSTRLEN];
+    			inet_ntop(AF_INET, &(client_address.sin_addr), ipAddress, INET_ADDRSTRLEN);
+
+    			std::cout << "Indirizzo IP del client: " << ipAddress << std::endl;
+				//////////////////////
+				pollfd new_pollfd = {client_fd, POLLIN, 0};
                 this->poll_vec.push_back(new_pollfd);
                 char hostname[NI_MAXHOST];
                 getnameinfo((struct sockaddr *) &s_address, sizeof(s_address), hostname, NI_MAXHOST, NULL, 0, NI_NUMERICSERV);

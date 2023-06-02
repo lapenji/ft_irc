@@ -16,6 +16,9 @@
 #include "Client.hpp"
 #include "utils.hpp"
 
+#include <arpa/inet.h>
+
+
 
 extern bool run;
 
