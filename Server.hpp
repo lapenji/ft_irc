@@ -38,18 +38,18 @@ private:
     void    ft_manage_nick(const std::string& tmp, int client_fd, Client* client);
     bool    ft_manage_user(const std::string& tmp, int client_fd, Client* client);
     bool    ft_manage_pass(const std::string& tmp);
-    void    ft_manage_mode(const std::string& tmp, int client_fd, const std::string& nick);
-    void    ft_manage_join(const std::string& tmp, int client_fd, Client* client, const std::string& nick, const std::string& user,const std::string& ip);
+    void    ft_manage_mode(const std::string& tmp, int client_fd);
+    void    ft_manage_join(const std::string& tmp, int client_fd, Client* client);
     void    ft_manage_ping(const std::string& tmp, int client_fd);
     void    ft_manage_part(const std::string& tmp, Client* client);
-    void    ft_manage_privmsg(const std::string& tmp, int client_fd, const std::string& nick);
-    void    ft_manage_invite(const std::string& tmp, int client_fd, const std::string& nick);
+    void    ft_manage_privmsg(const std::string& tmp, int client_fd);
+    void    ft_manage_invite(const std::string& tmp, int client_fd);
     void    ft_manage_topic(const std::string& tmp, int client_fd);
     void    ft_create_map_user(std::vector<std::string> result, int client_fd);
     void    ft_delete_client(int client_fd);
     void    ft_print_welcome_msg(int client_fd, Client* client);
     void    ft_refresh_chan(std::string channel, std::string joiner);
-    void    ft_manage_kick(const std::string& tmp, int client_fd, const std::string& nick);
+    void    ft_manage_kick(const std::string& tmp, int client_fd);
     int     find_client(const std::string& name);
     bool    isNickInUse(const std::string &nick);
     void    ft_manage_i(const std::string& resp, int client_fd, Channel* chan, char c);
@@ -58,6 +58,8 @@ private:
     void    ft_manage_l(const std::string& first_part, int client_fd, Channel* chan, std::vector<std::string> tmp_splitted);
     void    ft_manage_k(const std::string& resp, int client_fd, Channel* chan, std::vector<std::string> tmp_splitted);
     std::string	ft_resp_at(const std::string arg, int client_fd);////////////
+    void    ft_reply(const std::string& num, const std::string& arg, int client_fd);//////////
+    void    ft_print_topic(Channel* chan, const std::string& channel, int client_fd);
     void    ft_manage_quit(const std::string& tmp, int client_fd);
 public:
     Server(int port, const std::string& password);

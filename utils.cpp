@@ -146,6 +146,30 @@ bool    isNickValid(const std::string& nick) {
     return true;
 }
 
+std::string	Server::ft_resp_at(const std::string arg, int client_fd) {
+    std::string nick = this->connected_clients.at(client_fd)->getNick();
+    std::string user = this->connected_clients.at(client_fd)->getUser();
+	std::string ip = this->connected_clients.at(client_fd)->getIp();
+	std::string resp = ":" + nick + "!" + user + "@" + ip + arg + "\n";
+}
+
+void    Server::ft_reply(const std::string& num, const std::string& arg, int client_fd) {
+    std::string nick = this->connected_clients.at(client_fd)->getNick();
+    std::string resp = ":SovietServer " + num + nick + " " + arg;
+    this->serverReplyMessage(resp.c_str(), client_fd);
+}
+
 std::string build_461(const std::string& error, const std::string& nick) {
     return ":SovietServer 461 " + nick + " " + error + " :Not enought parameters.\n";
+}
+
+void    Server::ft_print_topic(Channel* chan, const std::string& channel, int client_fd) {
+    std::string ip = this->connected_clients.at(client_fd)->getIp();
+    std::string nick = this->connected_clients.at(client_fd)->getNick();
+    std::string user = this->connected_clients.at(client_fd)->getUser();
+    std::string resp = ":" + nick + "!" + user + "@" + ip + " JOIN " + channel + "\n"
+        + ":SovietServer 332 " + nick + " " + channel +  " " + chan->getTopic() + "\n"
+        + ":SovietServer 353 " + user + " = " + channel + " :" + chan->getUsers() + "\n"
+        + ":SovietServer 366 " + user + " " + channel + " :End of /NAMES list\n";
+    this->serverReplyMessage(resp.c_str(), client_fd);
 }

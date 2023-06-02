@@ -11,7 +11,6 @@ void Server::ft_manage_i(const std::string& resp, int client_fd, Channel* chan, 
 }
 
 void Server::ft_manage_o(const std::string& resp, int client_fd, Channel* chan, std::vector<std::string> tmp_splitted) {
-    //std::string resp = first_part + " " + tmp_splitted[3] + "\n";
     if (tmp_splitted[2][0] == '-') {
         if (chan->isUserAdmin(find_client(tmp_splitted[3])) == true) {
             chan->removeFromAdmin(find_client(tmp_splitted[3]));
@@ -29,7 +28,6 @@ void Server::ft_manage_o(const std::string& resp, int client_fd, Channel* chan, 
 }
 
 void Server::ft_manage_t(const std::string& resp, int client_fd, Channel* chan, char c) {
-    //std::string resp = first_part + "\n";
     this->serverReplyMessage(resp.c_str(), client_fd);
     chan->sendToAllusersExcept(resp.c_str(), client_fd);
     if (c == '-')
@@ -61,7 +59,6 @@ void Server::ft_manage_l(const std::string& first_part, int client_fd, Channel* 
 
 void Server::ft_manage_k(const std::string& resp, int client_fd, Channel* chan, std::vector<std::string> tmp_splitted) {
     if (tmp_splitted[2][0] == '+') {
-        //std::string resp = first_part + " " + tmp_splitted[3] + "\n";
         chan->setNeedPassword(true, tmp_splitted[3]);
         this->serverReplyMessage(resp.c_str(), client_fd);
         chan->sendToAllusersExcept(resp.c_str(), client_fd);
@@ -69,7 +66,8 @@ void Server::ft_manage_k(const std::string& resp, int client_fd, Channel* chan, 
     else {
         if (tmp_splitted[3] == chan->getPassword()) {
             chan->setNeedPassword(false, "");
-            //std::string resp = first_part + " " + tmp_splitted[3] + "\n";
+            this->serverReplyMessage(resp.c_str(), client_fd);
+            chan->sendToAllusersExcept(resp.c_str(), client_fd);
         }
         else {
             return;
@@ -77,16 +75,8 @@ void Server::ft_manage_k(const std::string& resp, int client_fd, Channel* chan, 
     }
 }
 
-
-
-std::string	Server::ft_resp_at(const std::string arg, int client_fd) {
+void    Server::ft_manage_mode(const std::string& tmp, int client_fd) {
     std::string nick = this->connected_clients.at(client_fd)->getNick();
-    std::string user = this->connected_clients.at(client_fd)->getUser();
-	std::string ip = this->connected_clients.at(client_fd)->getIp();
-	std::string resp = ":" + nick + "!" + user + "@" + ip + arg + "\n";
-}
-
-void    Server::ft_manage_mode(const std::string& tmp, int client_fd, const std::string& nick) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     if (this->channels.find(tmp_splitted[1]) != this->channels.end()) {
         Channel* chan = this->channels.at(tmp_splitted[1]);
@@ -94,7 +84,6 @@ void    Server::ft_manage_mode(const std::string& tmp, int client_fd, const std:
             return;
         }
         if (chan->isUserAdmin(client_fd) && tmp_splitted.size() > 2) {
-            //std::string first_part = ":" + nick + "!" + user + "@" + ip + " MODE " + tmp_splitted[1] + " " + tmp_splitted[2];//////////
             if (tmp_splitted.size() > 2) {
                 if (tmp_splitted[2][1] == 'i') {
                     ft_manage_i(ft_resp_at((" MODE " + tmp_splitted[1] + " " + tmp_splitted[2] + "\n"), client_fd), client_fd, chan, tmp_splitted[2][0]);
@@ -115,9 +104,7 @@ void    Server::ft_manage_mode(const std::string& tmp, int client_fd, const std:
             }
         }
         else if (chan->isUserAdmin(client_fd) == false && tmp_splitted.size() > 2) {
-            std::string resp = ":SovietServer 482 " + nick + " " + tmp_splitted[1] + " :You must have channel op access or above to set channel mode "
-                + tmp_splitted[2] + "\n";
-            this->serverReplyMessage(resp.c_str(), client_fd);
+            ft_reply("482 ", (tmp_splitted[1] + " :You must have channel op access or above to set channel mode " + tmp_splitted[2] + "\n"), client_fd);
         }
         if (tmp_splitted.size() == 2) {
             std::string resp = ":SovietServ 324 " + nick + " " + tmp_splitted[1] + " +n";
