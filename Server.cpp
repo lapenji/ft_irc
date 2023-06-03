@@ -1,13 +1,11 @@
 #include "Server.hpp"
 
-Server::Server(int port, const std::string &password) : opt(1), port(port), password(password)
-{
+Server::Server(int port, const std::string &password) : opt(1), port(port), password(password) {
     this->socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     setSocket();
 }
 
-Server::~Server()
-{
+Server::~Server() {
     std::cout << "distruttore in azione" << std::endl;
     std::map<int, Client *>::iterator it = this->connected_clients.begin();
     while (it != this->connected_clients.end())
@@ -24,8 +22,7 @@ Server::~Server()
     }
 }
 
-void Server::setSocket()
-{
+void Server::setSocket() {
     if (this->socket_fd < 0)
     {
         std::cerr << "Error creating socket, exit...";
@@ -56,8 +53,7 @@ void Server::setSocket()
               << std::endl;
 }
 
-void Server::ft_manage_who(const std::string &tmp, int client_fd, const std::string &nick)
-{
+void Server::ft_manage_who(const std::string &tmp, int client_fd, const std::string &nick) {
     if (tmp.find("#") != std::string::npos && this->channels.find(tmp.substr(tmp.find(" ") + 1)) != this->channels.end())
     {
         Channel *chan = this->channels.at(tmp.substr(tmp.find(" ") + 1));
@@ -88,16 +84,14 @@ void Server::ft_manage_who(const std::string &tmp, int client_fd, const std::str
     this->serverReplyMessage(resp2.c_str(), client_fd);
 }
 
-void Server::ft_manage_topic(const std::string &tmp, int client_fd)
-{
+void Server::ft_manage_topic(const std::string &tmp, int client_fd) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     std::string msg = ft_joinStr(tmp_splitted, 2);
     Channel *chan = this->channels.at(tmp_splitted[1]);
     chan->changeTopic(msg, client_fd);
 }
 
-void Server::ft_manage_kick(const std::string &tmp, int client_fd)
-{
+void Server::ft_manage_kick(const std::string &tmp, int client_fd) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     if (this->channels.find(tmp_splitted[1]) != this->channels.end())
     {
@@ -129,8 +123,7 @@ void Server::ft_manage_kick(const std::string &tmp, int client_fd)
     }
 }
 
-void Server::ft_manage_invite(const std::string &tmp, int client_fd)
-{
+void Server::ft_manage_invite(const std::string &tmp, int client_fd) {
     bool success = false;
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     std::string resp;
@@ -163,8 +156,7 @@ void Server::ft_manage_invite(const std::string &tmp, int client_fd)
     }
 }
 
-void Server::ft_manage_privmsg(const std::string &tmp, int client_fd)
-{
+void Server::ft_manage_privmsg(const std::string &tmp, int client_fd) {
     std::string nick = this->connected_clients.at(client_fd)->getNick();
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     std::string msg = ft_joinStr(tmp_splitted, 2);
@@ -212,8 +204,7 @@ void Server::ft_manage_privmsg(const std::string &tmp, int client_fd)
     }
 }
 
-void Server::ft_manage_quit(const std::string &tmp, int client_fd)
-{
+void Server::ft_manage_quit(const std::string &tmp, int client_fd) {
     std::vector<int> alreadyComunicated;
     alreadyComunicated.clear();
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
@@ -239,8 +230,7 @@ void Server::ft_manage_quit(const std::string &tmp, int client_fd)
     }
 }
 
-void Server::ft_manage_part(const std::string &tmp, Client *client)
-{
+void Server::ft_manage_part(const std::string &tmp, Client *client) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     Channel *chan = this->channels.at(tmp_splitted[1]);
     if (tmp_splitted.size() > 2)
@@ -258,8 +248,7 @@ void Server::ft_manage_part(const std::string &tmp, Client *client)
     }
 }
 
-void Server::ft_manage_join(const std::string &tmp, int client_fd, Client *client)
-{
+void Server::ft_manage_join(const std::string &tmp, int client_fd, Client *client) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     if (tmp_splitted.size() < 2)
     {
@@ -307,8 +296,7 @@ void Server::ft_manage_join(const std::string &tmp, int client_fd, Client *clien
     printMap(this->channels);
 }
 
-void Server::ft_manage_ping(const std::string &tmp, int client_fd)
-{
+void Server::ft_manage_ping(const std::string &tmp, int client_fd) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     if (tmp_splitted.size() == 2)
     {
@@ -322,8 +310,7 @@ void Server::ft_manage_ping(const std::string &tmp, int client_fd)
     }
 }
 
-bool Server::ft_manage_pass(const std::string &tmp)
-{
+bool Server::ft_manage_pass(const std::string &tmp) {
     if (tmp.length() > 5)
     {
         if (tmp.substr(tmp.find(":") + 1) == this->password)
@@ -338,8 +325,7 @@ bool Server::ft_manage_pass(const std::string &tmp)
     return false;
 }
 
-void Server::ft_manage_userhost(const std::string &tmp, int client_fd, Client *client)
-{
+void Server::ft_manage_userhost(const std::string &tmp, int client_fd, Client *client) {
     std::string resp = ":SovietServer 302 " + client->getNick() + " :";
     if (this->connected_clients.find(this->find_client(tmp.substr(tmp.find(" ") + 1))) != this->connected_clients.end())
     {
@@ -351,8 +337,7 @@ void Server::ft_manage_userhost(const std::string &tmp, int client_fd, Client *c
     this->serverReplyMessage(resp.c_str(), client_fd);
 }
 
-bool Server::ft_manage_user(const std::string &tmp, int client_fd, Client *client)
-{
+bool Server::ft_manage_user(const std::string &tmp, int client_fd, Client *client) {
     std::vector<std::string> result = ft_splitString(tmp);
     if (client->getFull() != "")
     {
@@ -375,8 +360,7 @@ bool Server::ft_manage_user(const std::string &tmp, int client_fd, Client *clien
     }
 }
 
-void Server::ft_manage_nick(const std::string &tmp, int client_fd, Client *client)
-{
+void Server::ft_manage_nick(const std::string &tmp, int client_fd, Client *client) {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     if (tmp_splitted.size() < 2)
     {
@@ -418,136 +402,110 @@ void Server::ft_manage_nick(const std::string &tmp, int client_fd, Client *clien
     }
 }
 
-int Server::handle_client_request(int client_fd)
-{
+int Server::handle_client_request(int client_fd) {
 
     Client *client = this->connected_clients.at(client_fd);
 
     char buffer[1024];
     bzero(buffer, 1024);
     int num_bytes = recv(client_fd, buffer, sizeof(buffer), 0);
-    if (num_bytes == -1)
-    {
+    if (num_bytes == -1) {
         std::cerr << "->>\tError handling client!" << std::endl;
         return -1;
     }
-    else if (num_bytes == 0)
-    {
+    else if (num_bytes == 0) {
         std::cout << "->>\tConnessione chiusa sulla porta " << this->port << std::endl;
         return -1;
     }
-    else
-    {
+    else {
         std::cout << "\033[1;31m\n--->>> RICEVUTO QUESTO MESSAGGIO DAL CLIENT: " << client_fd << " <<<---\n\n\033[0m" << buffer << std::endl;
         std::string tmp = buffer;
         std::vector<std::string> buffer_splitted = ft_splitBuffer(tmp);
-        if (client->getCap() == false)
-        {
+        if (client->getCap() == false) {
             this->serverReplyMessage("IRC CAP REQ :none\n", client_fd);
             client->setCap(true);
         }
-        for (size_t i = 0; i < buffer_splitted.size(); ++i)
-        {
-            if (buffer_splitted[i].find("NICK") == 0)
-            {
+        for (size_t i = 0; i < buffer_splitted.size(); ++i) {
+            if (buffer_splitted[i].substr(0, 4)  == "NICK") {
                 ft_manage_nick(buffer_splitted[i], client_fd, client);
             }
-            else if (buffer_splitted[i].find("USER") == 0 && buffer_splitted[i].find("USERHOST") != 0)
-            {
+            else if (buffer_splitted[i].substr(0, 4)  == "USER" && buffer_splitted[i].find("USERHOST") != 0) {
                 if (ft_manage_user(buffer_splitted[i], client_fd, client) == false)
                     return -1;
             }
-            else if (buffer_splitted[i].find("USERHOST") == 0)
-            {
+            else if (buffer_splitted[i].substr(0, 8)  == "USERHOST") {
                 ft_manage_userhost(buffer_splitted[i], client_fd, client);
             }
-            else if (buffer_splitted[i].find("PASS") == 0)
-            {
-                if (ft_manage_pass(buffer_splitted[i]) == false)
-                {
+            else if (buffer_splitted[i].substr(0, 4)  == "PASS") {
+                if (ft_manage_pass(buffer_splitted[i]) == false) {
                     std::string resp;
                     client->setAut(false);
                 }
-                else
-                {
+                else {
                     client->setAut(true);
                 }
             }
-            else if (buffer_splitted[i].find("MODE") == 0)
-            {
+            else if (buffer_splitted[i].substr(0, 4)  == "MODE") {
                 ft_manage_mode(buffer_splitted[i], client_fd);
             }
-            else if (buffer_splitted[i].find("PING") == 0)
-            {
+            else if (buffer_splitted[i].substr(0, 4)  == "PING") {
                 ft_manage_ping(buffer_splitted[i], client_fd);
             }
-            else if (buffer_splitted[i].find("JOIN") == 0)
-            {
+            else if (buffer_splitted[i].substr(0, 4)  == "JOIN") {
                 ft_manage_join(buffer_splitted[i], client_fd, client);
             }
-            else if (buffer_splitted[i].find("PART") == 0)
-            {
+            else if (buffer_splitted[i].substr(0, 4)  == "PART") {
                 ft_manage_part(buffer_splitted[i], client);
             }
-            else if (buffer_splitted[i].find("PRIVMSG") == 0)
-            {
+            else if (buffer_splitted[i].substr(0, 7)  == "PRIVMSG") {
                 ft_manage_privmsg(buffer_splitted[i], client_fd);
             }
-            else if (buffer_splitted[i].find("TOPIC") == 0)
-            {
+            else if (buffer_splitted[i].substr(0, 5)  == "TOPIC") {
                 ft_manage_topic(buffer_splitted[i], client_fd);
             }
-            else if (buffer_splitted[i].find("INVITE") == 0)
-            {
+            else if (buffer_splitted[i].substr(0, 6)  == "INVITE") {
                 ft_manage_invite(buffer_splitted[i], client_fd);
             }
-            else if (buffer_splitted[i].find("KICK") == 0)
-            {
+            else if (buffer_splitted[i].substr(0, 4)  == "KICK") {
                 ft_manage_kick(buffer_splitted[i], client_fd);
             }
-            else if (buffer_splitted[i].find("WHO") == 0)
-            {
+            else if (buffer_splitted[i].substr(0, 3)  == "WHO") {
                 ft_manage_who(buffer_splitted[i], client_fd, client->getNick());
             }
-            else if (buffer_splitted[i].find("QUIT") == 0)
-            {
+            //else if (buffer_splitted[i].substr(0, 3)  == "BOT") {
+            //    ft_manage_bot(buffer_splitted[i], client_fd, client->getNick());
+            //}
+            else if (buffer_splitted[i].substr(0, 4)  == "QUIT") {
                 ft_manage_quit(buffer_splitted[i], client_fd);
                 return -1;
             }
         }
-        if (client->getNick().size() > 0 && client->getFull().size() > 0 && client->getPrinted() == false)
-        {
+        if (client->getNick().size() > 0 && client->getFull().size() > 0 && client->getPrinted() == false){
             ft_print_welcome_msg(client_fd, client);
         }
     }
     return 0;
 }
 
-void Server::startServer()
-{
+void Server::startServer() {
 
     sockaddr_in s_address = {};
     pollfd new_pollfd = {socket_fd, POLLIN, 0};
     this->poll_vec.push_back(new_pollfd);
-    while (true)
-    {
+    while (true) {
         signal(SIGINT, ft_signal_ctrl_c);
-        if (poll(this->poll_vec.data(), this->poll_vec.size(), -1) == -1)
-        {
+        if (poll(this->poll_vec.data(), this->poll_vec.size(), -1) == -1) {
             // std::cerr << "Poll error, exit..." << std::endl;
             return;
         }
-        if (this->poll_vec[0].revents & POLLIN)
-        {
+        if (this->poll_vec[0].revents & POLLIN) {
             sockaddr_in client_address = {};
             socklen_t client_address_len = sizeof(client_address);
             int client_fd = accept(this->socket_fd, (sockaddr *)&client_address, &client_address_len);
-            if (client_fd < 0)
-            {
+            if (client_fd < 0) {
                 std::cerr << "->>\tNew connection refused" << std::endl;
             }
-            else
-            {
+            else {
                 std::cout << "->>\tNew connection accepted" << std::endl;
                 ///////////STAMPA IP DEL CLIENT
                 char ipAddress[INET_ADDRSTRLEN];
@@ -568,14 +526,10 @@ void Server::startServer()
         }
         std::vector<pollfd>::iterator it = this->poll_vec.begin();
         it++;
-        while (it != this->poll_vec.end())
-        {
-            if (it->revents & POLLIN)
-            {
-                if (handle_client_request(it->fd) == -1)
-                {
-                    if (this->connected_clients.find(it->fd) != this->connected_clients.end())
-                    {
+        while (it != this->poll_vec.end()) {
+            if (it->revents & POLLIN) {
+                if (handle_client_request(it->fd) == -1) {
+                    if (this->connected_clients.find(it->fd) != this->connected_clients.end()) {
                         ft_delete_client(it->fd);
                         this->connected_clients.erase(it->fd);
                     }
