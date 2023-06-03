@@ -80,6 +80,7 @@ void Server::ft_manage_who(const std::string &tmp, int client_fd, const std::str
     else if (this->connected_clients.find(this->find_client(tmp.substr(tmp.find(" ") + 1))) != this->connected_clients.end())
     {
         Client *client = this->connected_clients.at(this->find_client(tmp.substr(tmp.find(" ") + 1)));
+        std::cout << "STAMPO GETFULL" << client->getFull() << std::endl;
         std::string resp = ":SovietServer 352 " + nick + " * " + client->getUser() + " " + client->getIp() + " SovietServer " + client->getNick() + " H :0 " + client->getFull() + "\n";
         this->serverReplyMessage(resp.c_str(), client_fd);
     }
@@ -197,6 +198,7 @@ void Server::ft_manage_privmsg(const std::string &tmp, int client_fd)
         }
     }
     else
+
     {
         if (this->find_client(tmp_splitted[1]) == -1)
         {

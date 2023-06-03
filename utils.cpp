@@ -114,7 +114,7 @@ void Server::ft_create_map_user(std::vector<std::string> result, int client_fd)
     client->setServerName(result[3]);
     if (result.size() > 5)
     {
-        std::string tmp = ft_joinStr(result, 1);
+        std::string tmp = ft_joinStr(result, 3);
         client->setFullName(tmp.substr(1));
     }
     else
