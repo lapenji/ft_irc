@@ -48,6 +48,7 @@ public:
     void setPassword(const std::string &password);
     void removeFromAdmin(int client);
     std::string &getPassword();
+    std::string getName();
     int getMaxUsers();
     bool getUserNrLimited();
     void setMaxUsers(int nr);

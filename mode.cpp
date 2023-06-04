@@ -16,6 +16,11 @@ void Server::ft_manage_o(const std::string &resp, int client_fd, Channel *chan, 
 {
     if (tmp_splitted[2][0] == '-')
     {
+        if (tmp_splitted[3] == "bot")
+        {
+            // ft_bot_op(client_fd, chan->getName(), this->connected_clients.at(client_fd)->getNick());
+            return;
+        }
         if (chan->isUserAdmin(find_client(tmp_splitted[3])) == true)
         {
             chan->removeFromAdmin(find_client(tmp_splitted[3]));
@@ -25,6 +30,11 @@ void Server::ft_manage_o(const std::string &resp, int client_fd, Channel *chan, 
     }
     else if (tmp_splitted[2][0] == '+')
     {
+        if (tmp_splitted[3] == "bot")
+        {
+            ft_bot_op(client_fd, chan->getName(), this->connected_clients.at(client_fd)->getNick());
+            return;
+        }
         if (chan->isUserAdmin(find_client(tmp_splitted[3])) == false)
         {
             chan->addAdmin(this->connected_clients.at(find_client(tmp_splitted[3])));

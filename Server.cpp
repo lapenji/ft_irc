@@ -3,7 +3,9 @@
 Server::Server(int port, const std::string &password) : opt(1), port(port), password(password)
 {
     this->socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-    setSocket();
+    this->nrInsulti = 0;
+    this->setSocket();
+    ft_initialize_bot();
 }
 
 Server::~Server()
@@ -134,16 +136,16 @@ void Server::ft_manage_kick(const std::string &tmp, int client_fd)
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
     if (this->channels.find(tmp_splitted[1]) != this->channels.end())
     {
-        if (this->channels.at(tmp_splitted[1])->isUserInChan(this->find_client(tmp_splitted[2])) == false)
+        if (this->channels.at(tmp_splitted[1])->isUserInChan(this->find_client(tmp_splitted[2])) == false && this->channels.at(tmp_splitted[1])->getIsBotInside() == false)
         {
             ft_reply("441 ", (tmp_splitted[2] + " " + tmp_splitted[1] + " :They aren't on that channel\n"), client_fd);
             return;
         }
-        if (tmp_splitted[2] == "bot" && this->channels.at(tmp_splitted[1])->getIsBotInside() == false)
-        {
-            ft_reply("441 ", (tmp_splitted[2] + " " + tmp_splitted[1] + " :They aren't on that channel\n"), client_fd);
-            return;
-        }
+        // if (tmp_splitted[2] == "bot" && this->channels.at(tmp_splitted[1])->getIsBotInside() == false)
+        // {
+        //     ft_reply("441 ", (tmp_splitted[2] + " " + tmp_splitted[1] + " :They aren't on that channel\n"), client_fd);
+        //     return;
+        // }
         if (this->channels.at(tmp_splitted[1])->isUserAdmin(client_fd) == true)
         {
             std::string reason = "";
@@ -152,6 +154,9 @@ void Server::ft_manage_kick(const std::string &tmp, int client_fd)
             if (tmp_splitted[2] == "bot")
             {
                 this->channels.at(tmp_splitted[1])->setIsBotInside(false);
+                this->channels.at(tmp_splitted[1])->sendToAllusersExcept(resp, client_fd);
+                this->serverReplyMessage(resp.c_str(), client_fd);
+                return;
             }
             this->serverReplyMessage(resp.c_str(), client_fd);
             std::map<int, Client *>::iterator it = this->connected_clients.begin();
@@ -214,6 +219,9 @@ void Server::ft_manage_invite(const std::string &tmp, int client_fd)
                 std::string resp = ":bot!stalin@666.666.666.666 JOIN " + tmp_splitted[2] + "\n";
                 this->channels.at(tmp_splitted[2])->sendToAllusersExcept(resp.c_str(), client_fd);
                 this->serverReplyMessage(resp.c_str(), client_fd);
+                std::string resp2 = ":bot PRIVMSG " + tmp_splitted[2] + " :Ciao merde, sono qua per insultarvi!\n";
+                this->channels.at(tmp_splitted[2])->sendToAllusersExcept(resp2.c_str(), client_fd);
+                this->serverReplyMessage(resp2.c_str(), client_fd);
                 return;
             }
             else
@@ -286,16 +294,19 @@ void Server::ft_manage_privmsg(const std::string &tmp, int client_fd)
                 {
                     std::string insultato = msg.substr(msg.find("insulta") + 8);
                     insultato = insultato.substr(0, insultato.find(" "));
+                    if (insultato == "bot")
+                    {
+                        ft_bot_insult_bot(nick, chan->getName(), client_fd);
+                        return;
+                    }
                     if (this->find_client(insultato) != -1 && chan->isUserInChan(find_client(insultato)))
                     {
-                        // MANDA INSULTO
+                        ft_bot_insult_someone(insultato, chan->getName(), client_fd);
                     }
                     else
                     {
-                        // INSULTA CHI HA CHIESTO DI INSULTARE
+                        ft_bot_no_user_in_chan(nick, chan->getName(), client_fd);
                     }
-                    std::cout << "LA PERSONA DA INSULTARE [" << insultato << std::endl;
-                    std::cout << "BOT DEVE INSULTARE" << std::endl;
                 }
             }
             else
@@ -365,6 +376,43 @@ void Server::ft_manage_part(const std::string &tmp, Client *client)
     }
 }
 
+void Server::ft_multiple_join(std::vector<std::string> chans, int client_fd, Client *client)
+{
+    std::vector<std::string>::iterator it = chans.begin();
+    while (it != chans.end())
+    {
+        if (this->channels.find(*it) == this->channels.end())
+        {
+            this->channels.insert(std::make_pair(*it, new Channel(client, *it)));
+            Channel *chan = this->channels.at(*it);
+            chan->addAdmin(client);
+        }
+        Channel *chan = this->channels.at(*it);
+        if (chan->getInviteOnly() == true && chan->isInvited(client->getNick()) == false)
+        {
+            ft_reply("473 ", (*it + " :Cannot join channel (Invite only)\n"), client_fd);
+            return;
+        }
+        if (chan->getUserNrLimited() == true && chan->getHowManyUsers() >= chan->getMaxUsers())
+        {
+            ft_reply("471 ", (*it + " :Cannot join channel (Channel is full)\n"), client_fd);
+            return;
+        }
+        if (chan->getNeedPassword() == true)
+        {
+            ft_reply("475 ", ":Cannot join channel (Incorrect channel key)\n", client_fd);
+            return;
+        }
+        chan->addClient(client);
+        if (chan->isInvited(client->getNick()) == true)
+        {
+            chan->removeToInvited(client->getNick());
+        }
+        ft_print_topic(chan, *it, client_fd);
+        it++;
+    }
+}
+
 void Server::ft_manage_join(const std::string &tmp, int client_fd, Client *client)
 {
     std::vector<std::string> tmp_splitted = ft_splitString(tmp);
@@ -381,6 +429,11 @@ void Server::ft_manage_join(const std::string &tmp, int client_fd, Client *clien
     }
     if (this->channels.find(tmp_splitted[1]) != this->channels.end() && this->channels.at(tmp_splitted[1])->isUserInChan(client_fd) == true)
     {
+        return;
+    }
+    if (tmp_splitted[1].find(",") != std::string::npos)
+    {
+        ft_multiple_join(ft_splitChans(tmp_splitted[1]), client_fd, client);
         return;
     }
     if (this->channels.find(tmp_splitted[1]) == this->channels.end())
@@ -415,7 +468,7 @@ void Server::ft_manage_join(const std::string &tmp, int client_fd, Client *clien
     }
     ft_print_topic(chan, tmp_splitted[1], client_fd);
 
-    printMap(this->channels);
+    // printMap(this->channels);
 }
 
 void Server::ft_manage_ping(const std::string &tmp, int client_fd)

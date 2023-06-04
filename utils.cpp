@@ -24,6 +24,18 @@ std::vector<std::string> ft_splitString(const std::string &str)
     return result;
 }
 
+std::vector<std::string> ft_splitChans(const std::string &str)
+{
+    std::vector<std::string> result;
+    std::stringstream ss(str);
+    std::string word;
+    while (std::getline(ss, word, ','))
+    {
+        result.push_back(word);
+    }
+    return result;
+}
+
 std::vector<std::string> ft_splitBuffer(std::string tmp)
 {
     size_t pos = tmp.find("\n");

@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <strings.h>
+#include <time.h>
 #include "Client.hpp"
 #include "utils.hpp"
 
@@ -31,6 +32,8 @@ private:
     std::vector<pollfd> poll_vec;
     std::map<int, Client *> connected_clients;
     std::map<std::string, Channel *> channels;
+    std::vector<std::string> insulti;
+    int nrInsulti;
 
     void ft_print_motd(int client_fd);
     void serverReplyMessage(const char *response, int client_fd);
@@ -65,6 +68,13 @@ private:
     void ft_manage_who(const std::string &tmp, int client_fd, const std::string &nick);
     void ft_manage_userhost(const std::string &tmp, int client_fd, Client *client);
     void ft_manage_b(const std::string chan, int client_fd);
+    void ft_initialize_bot();
+    void ft_bot_insult_someone(const std::string &nick, const std::string &chan, int client_fd);
+    std::string ft_bot_get_insult();
+    void ft_bot_no_user_in_chan(const std::string &nick, const std::string &chan, int client_fd);
+    void ft_bot_insult_bot(const std::string &nick, const std::string &chan, int client_fd);
+    void ft_bot_op(int client_fd, const std::string &chan, const std::string &nick);
+    void ft_multiple_join(std::vector<std::string> chans, int client_fd, Client *client);
 
 public:
     Server(int port, const std::string &password);

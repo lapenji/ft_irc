@@ -356,3 +356,8 @@ int Channel::getHowManyUsers()
     }
     return res;
 }
+
+std::string Channel::getName()
+{
+    return this->name;
+}
