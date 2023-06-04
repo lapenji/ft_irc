@@ -55,4 +55,5 @@ public:
     std::string getUsersAsEq();
     bool getIsBotInside();
     void setIsBotInside(bool arg);
+    int getHowManyUsers();
 };

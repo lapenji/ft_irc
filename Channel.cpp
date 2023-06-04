@@ -346,3 +346,13 @@ void Channel::setIsBotInside(bool arg)
 {
     this->isBotInside = arg;
 }
+
+int Channel::getHowManyUsers()
+{
+    int res = this->clients.size();
+    if (this->isBotInside == true)
+    {
+        res += 1;
+    }
+    return res;
+}
