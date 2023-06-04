@@ -11,6 +11,7 @@ void Server::ft_initialize_bot()
 			this->nrInsulti++;
 			this->insulti.push_back(insultotmp);
 		}
+		insulti.close();
 	}
 	if (this->nrInsulti == 0)
 	{
