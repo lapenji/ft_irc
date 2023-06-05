@@ -10,7 +10,7 @@ Server::Server(int port, const std::string &password) : opt(1), port(port), pass
 
 Server::~Server()
 {
-    std::cout << "distruttore in azione" << std::endl;
+    std::cout << "Server destructor called...\nBye!" << std::endl;
     std::map<int, Client *>::iterator it = this->connected_clients.begin();
     while (it != this->connected_clients.end())
     {
@@ -115,7 +115,6 @@ void Server::ft_manage_who(const std::string &tmp, int client_fd, const std::str
     else if (this->connected_clients.find(this->find_client(tmp.substr(tmp.find(" ") + 1))) != this->connected_clients.end())
     {
         Client *client = this->connected_clients.at(this->find_client(tmp.substr(tmp.find(" ") + 1)));
-        std::cout << "STAMPO GETFULL" << client->getFull() << std::endl;
         std::string resp = ":SovietServer 352 " + nick + " * " + client->getUser() + " " + client->getIp() + " SovietServer " + client->getNick() + " H :0 " + client->getFull() + "\n";
         this->serverReplyMessage(resp.c_str(), client_fd);
     }
@@ -579,6 +578,7 @@ void Server::ft_manage_nick(const std::string &tmp, int client_fd, Client *clien
             it++;
         }
         this->serverReplyMessage(resp.c_str(), client_fd);
+        std::cout << "\x1b[33;1m-\x1b[0m\tclient \x1b[32;1m" << client->getIp() << "\x1b[0m is now known as \x1b[35;1m" << client->getNick() << "\x1b[0m" << std::endl;
     }
     else if (tmp.length() > 5)
     {
@@ -601,12 +601,12 @@ int Server::handle_client_request(int client_fd)
     }
     else if (num_bytes == 0)
     {
-        std::cout << "->>\tConnessione chiusa sulla porta " << this->port << std::endl;
+        //std::cout << "->>\tConnessione chiusa sulla porta " << this->port << std::endl;
         return -1;
     }
     else
     {
-        std::cout << "\033[1;31m\n--->>> RICEVUTO QUESTO MESSAGGIO DAL CLIENT: " << client_fd << " <<<---\n\n\033[0m" << buffer << std::endl;
+        //std::cout << "\033[1;31m\n--->>> RICEVUTO QUESTO MESSAGGIO DAL CLIENT: " << client_fd << " <<<---\n\n\033[0m" << buffer << std::endl;
         std::string tmp = buffer;
         std::vector<std::string> buffer_splitted = ft_splitBuffer(tmp);
         if (client->getCap() == false)
@@ -624,6 +624,7 @@ int Server::handle_client_request(int client_fd)
             {
                 if (ft_manage_user(buffer_splitted[i], client_fd, client) == false)
                     return -1;
+                std::cout << "\x1b[33;1m-\x1b[0m\tclient \x1b[32;1m" << client->getIp() << "\x1b[0m completed connection as \x1b[35;1m" << client->getNick() << "\x1b[0m" << std::endl;
             }
             else if (buffer_splitted[i].find("USERHOST") == 0)
             {
@@ -680,6 +681,7 @@ int Server::handle_client_request(int client_fd)
             else if (buffer_splitted[i].find("QUIT") == 0)
             {
                 ft_manage_quit(buffer_splitted[i], client_fd);
+                std::cout << "\x1b[31;1m-\x1b[0m\tclient \x1b[32;1m" << client->getIp() << "\x1b[0m known as \x1b[35;1m" << client->getNick() << "\x1b[0m is quitting!"  << std::endl;
                 return -1;
             }
             else if (buffer_splitted[i].find("CAP") == std::string::npos)
@@ -720,12 +722,12 @@ void Server::startServer()
             }
             else
             {
-                std::cout << "->>\tNew connection accepted" << std::endl;
+                //std::cout << "->>\tNew connection accepted" << std::endl;
                 ///////////STAMPA IP DEL CLIENT
                 char ipAddress[INET_ADDRSTRLEN];
                 inet_ntop(AF_INET, &(client_address.sin_addr), ipAddress, INET_ADDRSTRLEN);
 
-                std::cout << "Indirizzo IP del client: " << ipAddress << std::endl;
+                //std::cout << "Indirizzo IP del client: " << ipAddress << std::endl;
                 //////////////////////
                 pollfd new_pollfd = {client_fd, POLLIN, 0};
                 this->poll_vec.push_back(new_pollfd);
@@ -733,9 +735,10 @@ void Server::startServer()
                 getnameinfo((struct sockaddr *)&s_address, sizeof(s_address), hostname, NI_MAXHOST, NULL, 0, NI_NUMERICSERV);
                 Client *tmp = new Client(new_pollfd.fd, ntohs(s_address.sin_port));
                 tmp->setIp(ipAddress);                             ///////aggiunto per settare ip, sarebbe meglio nel costruttore
-                std::cout << "ip = " << tmp->getIp() << std::endl; ////////
+                //std::cout << "ip = " << tmp->getIp() << std::endl; ////////
+                std::cout << "\x1b[32;1m-\x1b[0m\tnew client connected with ip: \x1b[32;1m" << tmp->getIp() << "\x1b[0m" << std::endl;
                 this->connected_clients.insert(std::make_pair(client_fd, tmp));
-                std::cout << "->>\tsocket:" << new_pollfd.fd << std::endl;
+                //std::cout << "->>\tsocket:" << new_pollfd.fd << std::endl;
             }
         }
         std::vector<pollfd>::iterator it = this->poll_vec.begin();
@@ -751,7 +754,7 @@ void Server::startServer()
                         ft_delete_client(it->fd);
                         this->connected_clients.erase(it->fd);
                     }
-                    std::cout << it->fd << " ->>\tDisconnected" << std::endl;
+                    //std::cout << it->fd << " ->>\tDisconnected" << std::endl;
                     close(it->fd);
                     this->poll_vec.erase(it);
                     it--;

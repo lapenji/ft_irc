@@ -4,11 +4,11 @@ bool run = true;
 
 void    ft_signal_ctrl_c(int sig) {
     (void)sig;
-    std::cout << "\nESCO!" << std::endl;
+    std::cout << "\nexiting for ctrl+c..." << std::endl;
 }
 
 int main (int argc, char **argv) {
-    
+
     if (argc != 3) {
         std::cerr << "Wrong number of params, exit..." << std::endl;
         return (-1);

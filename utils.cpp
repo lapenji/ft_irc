@@ -101,7 +101,6 @@ void Server::ft_delete_client(int client_fd)
         }
         map_it++;
     }
-    std::cout << "\033[1;32m-->> QUITTATO IL CLIENT\033[0m" << std::endl;
 }
 
 bool Server::isNickInUse(const std::string &nick)
@@ -135,7 +134,7 @@ void Server::ft_create_map_user(std::vector<std::string> result, int client_fd)
 
 void Server::serverReplyMessage(const char *response, int client_fd)
 {
-    std::cout << "STO PER MANDARE MSG " << response << std::endl;
+    //std::cout << "STO PER MANDARE MSG " << response << std::endl;
     if (send(client_fd, response, strlen(response), 0) == -1)
     {
         std::cerr << "->>\tError sending response to client!" << std::endl;
