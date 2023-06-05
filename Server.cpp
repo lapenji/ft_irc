@@ -54,8 +54,25 @@ void Server::setSocket()
         std::cerr << "Socket listening error, exit..." << std::endl;
         exit(-1);
     }
-    std::cout << "\033[1;33m\n->>\tSovietServer listening on port " << this->port << "\033[0m\n"
+    ft_print_banner();
+    std::cout << "\033[1;33m\n->>\tlistening on port " << this->port << "\033[0m\n"
               << std::endl;
+}
+
+void Server::ft_print_banner()
+{
+    std::cout << "\x1b[31;1m   _____  ______      _______ ______ _______ " << std::endl;
+    std::cout << "  / ____|/ __ \\ \\    / /_   _|  ____|__   __|" << std::endl;
+    std::cout << " | (___ | |  | \\ \\  / /  | | | |__     | |   " << std::endl;
+    std::cout << "  \\___ \\| |  | |\\ \\/ /   | | |  __|    | |" << std::endl;
+    std::cout << "  ____) | |__| | \\  /   _| |_| |____   | |  " << std::endl;
+    std::cout << " |_____/ \\____/ __\\/___|_____|______| _|_|_  " << std::endl;
+    std::cout << "  / ____|  ____|  __ \\ \\    / /  ____|  __ \\ " << std::endl;
+    std::cout << " | (___ | |__  | |__) \\ \\  / /| |__  | |__) |" << std::endl;
+    std::cout << "  \\___ \\|  __| |  _  / \\ \\/ / |  __| |  _  /  " << std::endl;
+    std::cout << "  ____) | |____| | \\ \\  \\  /  | |____| | \\ \\ " << std::endl;
+    std::cout << " |_____/|______|_|  \\_\\  \\/   |______|_|  \\_\\\x1b[0m" << std::endl;
+
 }
 
 void Server::ft_print_motd(int client_fd)
@@ -198,7 +215,6 @@ void Server::ft_manage_invite(const std::string &tmp, int client_fd)
     }
     else
     {
-        std::cout << "STAMPO TMP_SPLITTED1" << tmp_splitted[1] << std::endl;
         if (tmp_splitted[1] == "bot")
         {
             if (this->channels.find(tmp_splitted[2]) != this->channels.end())

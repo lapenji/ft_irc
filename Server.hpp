@@ -75,6 +75,7 @@ private:
     void ft_bot_insult_bot(const std::string &nick, const std::string &chan, int client_fd);
     void ft_bot_op(int client_fd, const std::string &chan, const std::string &nick);
     void ft_multiple_join(std::vector<std::string> chans, int client_fd, Client *client);
+    void ft_print_banner();
 
 public:
     Server(int port, const std::string &password);
