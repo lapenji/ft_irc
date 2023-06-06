@@ -609,11 +609,18 @@ int Server::handle_client_request(int client_fd)
 
     char buffer[1024];
     bzero(buffer, 1024);
-    int num_bytes = recv(client_fd, buffer, sizeof(buffer), 0);
-    if (num_bytes == -1)
+    int num_bytes;
+    num_bytes = recv(client_fd, buffer, sizeof(buffer), 0);
+    std::string tmpbuff = buffer;
+    if (num_bytes != 0 && strchr(buffer, '\n') == NULL)
     {
-        std::cerr << "->>\tError handling client!" << std::endl;
-        return -1;
+        std::cout << "Entro\n" << std::endl;
+        while(strchr(buffer, '\n') == NULL)
+        {
+            bzero(buffer, 1024);
+            num_bytes += recv(client_fd, buffer, sizeof(buffer), 0);
+            tmpbuff += buffer;
+        }
     }
     else if (num_bytes == 0)
     {
